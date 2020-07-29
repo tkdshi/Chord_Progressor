@@ -177,6 +177,7 @@ private:
 /** As the name suggest, this class does the actual audio processing. */
 class JuceDemoPluginAudioProcessor  : public AudioProcessor
 {
+
 public:
     //==============================================================================
     JuceDemoPluginAudioProcessor()
@@ -393,10 +394,64 @@ private:
               delayAttachment      (owner.state, "delay", delaySlider)
         {
 
-
+            //ボタンの内容表示
             addAndMakeVisible(Button_c1);
             Button_c1.setButtonText("C");
             Button_c1.onClick = [this] { setNoteNumber(36); };
+
+            addAndMakeVisible(Button_c2);
+            Button_c2.setButtonText("G");
+            Button_c2.onClick = [this] { setNoteNumber(36); };
+
+            addAndMakeVisible(Button_c3);
+            Button_c3.setButtonText("Am");
+            Button_c3.onClick = [this] { setNoteNumber(36); };
+
+            addAndMakeVisible(Button_c4);
+            Button_c4.setButtonText("Em");
+            Button_c4.onClick = [this] { setNoteNumber(36); };
+
+            addAndMakeVisible(Button_r1);
+            Button_r1.setButtonText("Normal");
+
+            addAndMakeVisible(Button_r2);
+            Button_r2.setButtonText("Normal");
+
+            addAndMakeVisible(Button_r3);
+            Button_r3.setButtonText("Normal");
+
+            addAndMakeVisible(Button_r4);
+            Button_r4.setButtonText("Normal");
+
+            addAndMakeVisible(Button_g1);
+            Button_g1.setButtonText("J-POP");
+
+            addAndMakeVisible(Button_g2);
+            Button_g2.setButtonText("ロック");
+
+            addAndMakeVisible(Button_g3);
+            Button_g3.setButtonText("ジャズ");
+
+            addAndMakeVisible(Button_g4);
+            Button_g4.setButtonText("EDM");
+
+            addAndMakeVisible(Button_g5);
+            Button_g5.setButtonText("アイドル");
+
+            addAndMakeVisible(Button_g6);
+            Button_g6.setButtonText("バラード");
+
+            addAndMakeVisible(Button_g7);
+            Button_g7.setButtonText("アニソン");
+
+            addAndMakeVisible(Button_g8);
+            Button_g8.setButtonText("ゲーム");
+
+            addAndMakeVisible(Button_L);
+            Button_L.setButtonText("<");
+
+            addAndMakeVisible(Button_R);
+            Button_R.setButtonText(">");
 
             // add some sliders..
             addAndMakeVisible (gainSlider);
@@ -452,15 +507,61 @@ private:
             // This lays out our child components...
 
             auto r = getLocalBounds().reduced (8);
+            
+            //ヘッダ部分
+            auto HeaderHeight = 26;
+            timecodeDisplayLabel.setBounds(r.removeFromTop(HeaderHeight));
 
-            timecodeDisplayLabel.setBounds (r.removeFromTop (26));
-            midiKeyboard        .setBounds (r.removeFromBottom (70));
+            //左右のボタン
+            auto sideWidth = 40;
+            Button_L.setBounds(r.removeFromLeft(sideWidth));
+            Button_R.setBounds(r.removeFromRight(sideWidth));
 
+            //楽譜
+            auto scoreArea  = r.removeFromTop(60);
+
+            //コードボタン
+            auto chordArea = r.removeFromTop(40);
+            Button_c1.setBounds(chordArea.removeFromLeft(chordArea.getWidth()/4));
+            Button_c2.setBounds(chordArea.removeFromLeft(chordArea.getWidth() / 3));
+            Button_c3.setBounds(chordArea.removeFromLeft(chordArea.getWidth() / 2));
+            Button_c4.setBounds(chordArea.removeFromLeft(chordArea.getWidth() / 1));
+
+
+            //リズムボタン
+            auto rythmArea = r.removeFromTop(25);
+            Button_r1.setBounds(rythmArea.removeFromLeft(rythmArea.getWidth()/4));
+            Button_r2.setBounds(rythmArea.removeFromLeft(rythmArea.getWidth()/3));
+            Button_r3.setBounds(rythmArea.removeFromLeft(rythmArea.getWidth()/2));
+            Button_r4.setBounds(rythmArea.removeFromLeft(rythmArea.getWidth()/1));
+
+            //ジャンル部分
+            auto genreArea = r.removeFromLeft(r.getWidth() / 2);
+            auto genrerow1 = genreArea.removeFromTop(genreArea.getHeight() / 2);
+            auto genrerow2 = genreArea.removeFromTop(genreArea.getHeight() / 1);
+            Button_g1.setBounds(genrerow1.removeFromLeft(genrerow1.getWidth()/4));
+            Button_g2.setBounds(genrerow1.removeFromLeft(genrerow1.getWidth()/3));
+            Button_g3.setBounds(genrerow1.removeFromLeft(genrerow1.getWidth()/2));
+            Button_g4.setBounds(genrerow1.removeFromLeft(genrerow1.getWidth()/1));
+            Button_g5.setBounds(genrerow2.removeFromLeft(genrerow2.getWidth()/4));
+            Button_g6.setBounds(genrerow2.removeFromLeft(genrerow2.getWidth()/3));
+            Button_g7.setBounds(genrerow2.removeFromLeft(genrerow2.getWidth()/2));
+            Button_g8.setBounds(genrerow2.removeFromLeft(genrerow2.getWidth()/1));
+
+            
+            //テンポなど表示
+            auto stateArea = r.removeFromLeft(r.getWidth() / 1);
+            auto staterow1 = stateArea.removeFromTop(stateArea.getHeight() / 2);
+            auto staterow2 = stateArea.removeFromTop(stateArea.getHeight());
             r.removeFromTop (20);
             auto sliderArea = r.removeFromTop (60);
-            gainSlider.setBounds  (sliderArea.removeFromLeft (jmin (180, sliderArea.getWidth() / 2)));
-            delaySlider.setBounds (sliderArea.removeFromLeft (jmin (180, sliderArea.getWidth())));
-            Button_c1.setBounds(sliderArea.removeFromLeft(jmin(180, sliderArea.getWidth())));
+            //gainSlider.setBounds  (sliderArea.removeFromLeft (jmin (180, sliderArea.getWidth() / 2)));
+            //delaySlider.setBounds (sliderArea.removeFromLeft (jmin (180, sliderArea.getWidth())));
+            //midiKeyboard.setBounds(r.removeFromBottom(70));
+
+
+            //ボトム部分
+
 
             lastUIWidth  = getWidth();
             lastUIHeight = getHeight();
@@ -501,7 +602,7 @@ private:
 
 
         //--------------------
-//midi関連のコンポーネント
+        //midi関連のコンポーネント
         static juce::String getMidiMessageDescription(const juce::MidiMessage& m)
         {
             if (m.isNoteOn())           return "Note on " + juce::MidiMessage::getMidiNoteName(m.getNoteNumber(), true, true, 3);
@@ -549,6 +650,16 @@ private:
         TextButton Button_r2;
         TextButton Button_r3;
         TextButton Button_r4;
+        TextButton Button_g1;
+        TextButton Button_g2;
+        TextButton Button_g3;
+        TextButton Button_g4;
+        TextButton Button_g5;
+        TextButton Button_g6;
+        TextButton Button_g7;
+        TextButton Button_g8;
+        TextButton Button_L;
+        TextButton Button_R;
 
         int midiChannel = 10;
         double startTime;
