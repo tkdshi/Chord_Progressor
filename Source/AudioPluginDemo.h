@@ -353,12 +353,6 @@ public:
 
 
 
-
-
-
-
-
-
         //==============================================================================
     };
 
@@ -427,31 +421,34 @@ private:
             Button_g1.setButtonText("J-POP");
 
             addAndMakeVisible(Button_g2);
-            Button_g2.setButtonText("ロック");
+            Button_g2.setButtonText("Rock");
 
             addAndMakeVisible(Button_g3);
-            Button_g3.setButtonText("ジャズ");
+            Button_g3.setButtonText("Jazz");
 
             addAndMakeVisible(Button_g4);
             Button_g4.setButtonText("EDM");
 
             addAndMakeVisible(Button_g5);
-            Button_g5.setButtonText("アイドル");
+            Button_g5.setButtonText("Idol");
 
             addAndMakeVisible(Button_g6);
-            Button_g6.setButtonText("バラード");
+            Button_g6.setButtonText("Ballade");
 
             addAndMakeVisible(Button_g7);
-            Button_g7.setButtonText("アニソン");
+            Button_g7.setButtonText("Anime");
 
             addAndMakeVisible(Button_g8);
-            Button_g8.setButtonText("ゲーム");
+            Button_g8.setButtonText("Game");
 
             addAndMakeVisible(Button_L);
             Button_L.setButtonText("<");
 
             addAndMakeVisible(Button_R);
             Button_R.setButtonText(">");
+
+            addAndMakeVisible(tempoDisplayLabel);
+            TempoLabel.setFont(Font(Font::getDefaultMonospacedFontName(), 15.0f, Font::plain));
 
             // add some sliders..
             addAndMakeVisible (gainSlider);
@@ -518,10 +515,10 @@ private:
             Button_R.setBounds(r.removeFromRight(sideWidth));
 
             //楽譜
-            auto scoreArea  = r.removeFromTop(60);
+            auto scoreArea  = r.removeFromTop(r.getHeight() / 3);
 
             //コードボタン
-            auto chordArea = r.removeFromTop(40);
+            auto chordArea = r.removeFromTop(r.getHeight() / 3);
             Button_c1.setBounds(chordArea.removeFromLeft(chordArea.getWidth()/4));
             Button_c2.setBounds(chordArea.removeFromLeft(chordArea.getWidth() / 3));
             Button_c3.setBounds(chordArea.removeFromLeft(chordArea.getWidth() / 2));
@@ -529,7 +526,7 @@ private:
 
 
             //リズムボタン
-            auto rythmArea = r.removeFromTop(25);
+            auto rythmArea = r.removeFromTop(r.getHeight() / 3);
             Button_r1.setBounds(rythmArea.removeFromLeft(rythmArea.getWidth()/4));
             Button_r2.setBounds(rythmArea.removeFromLeft(rythmArea.getWidth()/3));
             Button_r3.setBounds(rythmArea.removeFromLeft(rythmArea.getWidth()/2));
@@ -553,7 +550,10 @@ private:
             auto stateArea = r.removeFromLeft(r.getWidth() / 1);
             auto staterow1 = stateArea.removeFromTop(stateArea.getHeight() / 2);
             auto staterow2 = stateArea.removeFromTop(stateArea.getHeight());
-            r.removeFromTop (20);
+            
+            timecodeDisplayLabel.setBounds(staterow1.removeFromLeft(staterow1.getWidth()));
+            tempoDisplayLabel.setBounds(staterow2.removeFromLeft(staterow2.getWidth()));
+
             auto sliderArea = r.removeFromTop (60);
             //gainSlider.setBounds  (sliderArea.removeFromLeft (jmin (180, sliderArea.getWidth() / 2)));
             //delaySlider.setBounds (sliderArea.removeFromLeft (jmin (180, sliderArea.getWidth())));
@@ -636,11 +636,12 @@ private:
 
         MidiKeyboardComponent midiKeyboard;
 
-        Label timecodeDisplayLabel,
+        Label timecodeDisplayLabel, tempoDisplayLabel,
               gainLabel  { {}, "Throughput level:" },
               delayLabel { {}, "Delay:" };
 
         //使用するコンポーネントの宣言
+        Label TempoLabel;
         Slider gainSlider, delaySlider;
         TextButton Button_c1;
         TextButton Button_c2;
@@ -712,13 +713,14 @@ private:
         void updateTimecodeDisplay (AudioPlayHead::CurrentPositionInfo pos)
         {
             MemoryOutputStream displayText;
+            MemoryOutputStream displayText2; //テンポ
 
-            displayText << String (pos.bpm, 2) << " bpm, "
-            << pos.timeSigNumerator << '/' << pos.timeSigDenominator
+            displayText  << pos.timeSigNumerator << '/' << pos.timeSigDenominator
             << "  -  " << timeToTimecodeString (pos.timeInSeconds)
             << "  -  " << quarterNotePositionToBarsBeatsString (pos.ppqPosition,
                                                                 pos.timeSigNumerator,
                                                                 pos.timeSigDenominator);
+            displayText2 << " Tempo: " << String(pos.bpm, 2);
 
             if (pos.isRecording)
                 displayText << "  (recording)";
@@ -726,6 +728,7 @@ private:
                 displayText << "  (playing)";
 
             timecodeDisplayLabel.setText (displayText.toString(), dontSendNotification);
+            tempoDisplayLabel.setText(displayText2.toString(), dontSendNotification);
         }
 
         // called when the stored window size changes
