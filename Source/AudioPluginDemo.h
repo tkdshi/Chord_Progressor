@@ -343,10 +343,22 @@ public:
             const juce::SpinLock::ScopedLockType lock (mutex);
             return info;
         }
+    
 
     private:
         juce::SpinLock mutex;
         AudioPlayHead::CurrentPositionInfo info;
+
+
+
+
+
+
+
+
+
+
+        //==============================================================================
     };
 
     //==============================================================================
@@ -368,6 +380,7 @@ public:
 private:
     //==============================================================================
     /** This is the editor component that our filter will display. */
+    //GUIの編集
     class JuceDemoPluginAudioProcessorEditor  : public AudioProcessorEditor,
                                                 private Timer,
                                                 private Value::Listener
@@ -379,6 +392,12 @@ private:
               gainAttachment       (owner.state, "gain",  gainSlider),
               delayAttachment      (owner.state, "delay", delaySlider)
         {
+
+
+            addAndMakeVisible(Button_c1);
+            Button_c1.setButtonText("C");
+            Button_c1.onClick = [this] { setNoteNumber(36); };
+
             // add some sliders..
             addAndMakeVisible (gainSlider);
             gainSlider.setSliderStyle (Slider::Rotary);
@@ -427,6 +446,7 @@ private:
             g.fillAll();
         }
 
+        //描画内容
         void resized() override
         {
             // This lays out our child components...
@@ -440,6 +460,7 @@ private:
             auto sliderArea = r.removeFromTop (60);
             gainSlider.setBounds  (sliderArea.removeFromLeft (jmin (180, sliderArea.getWidth() / 2)));
             delaySlider.setBounds (sliderArea.removeFromLeft (jmin (180, sliderArea.getWidth())));
+            Button_c1.setBounds(sliderArea.removeFromLeft(jmin(180, sliderArea.getWidth())));
 
             lastUIWidth  = getWidth();
             lastUIHeight = getHeight();
@@ -477,13 +498,61 @@ private:
         }
 
     private:
+
+
+        //--------------------
+//midi関連のコンポーネント
+        static juce::String getMidiMessageDescription(const juce::MidiMessage& m)
+        {
+            if (m.isNoteOn())           return "Note on " + juce::MidiMessage::getMidiNoteName(m.getNoteNumber(), true, true, 3);
+            if (m.isNoteOff())          return "Note off " + juce::MidiMessage::getMidiNoteName(m.getNoteNumber(), true, true, 3);
+            if (m.isProgramChange())    return "Program change " + juce::String(m.getProgramChangeNumber());
+            if (m.isPitchWheel())       return "Pitch wheel " + juce::String(m.getPitchWheelValue());
+            if (m.isAftertouch())       return "After touch " + juce::MidiMessage::getMidiNoteName(m.getNoteNumber(), true, true, 3) + ": " + juce::String(m.getAfterTouchValue());
+            if (m.isChannelPressure())  return "Channel pressure " + juce::String(m.getChannelPressureValue());
+            if (m.isAllNotesOff())      return "All notes off";
+            if (m.isAllSoundOff())      return "All sound off";
+            if (m.isMetaEvent())        return "Meta event";
+
+            if (m.isController())
+            {
+                juce::String name(juce::MidiMessage::getControllerName(m.getControllerNumber()));
+
+                if (name.isEmpty())
+                    name = "[" + juce::String(m.getControllerNumber()) + "]";
+
+                return "Controller " + name + ": " + juce::String(m.getControllerValue());
+            }
+
+            return juce::String::toHexString(m.getRawData(), m.getRawDataSize());
+        }
+
+        void setNoteNumber(int noteNumber)
+        {
+            auto message = juce::MidiMessage::noteOn(midiChannel, noteNumber, (juce::uint8) 100);
+            message.setTimeStamp(juce::Time::getMillisecondCounterHiRes() * 0.001 - startTime);
+        }
+
         MidiKeyboardComponent midiKeyboard;
 
         Label timecodeDisplayLabel,
               gainLabel  { {}, "Throughput level:" },
               delayLabel { {}, "Delay:" };
 
+        //使用するコンポーネントの宣言
         Slider gainSlider, delaySlider;
+        TextButton Button_c1;
+        TextButton Button_c2;
+        TextButton Button_c3;
+        TextButton Button_c4;
+        TextButton Button_r1;
+        TextButton Button_r2;
+        TextButton Button_r3;
+        TextButton Button_r4;
+
+        int midiChannel = 10;
+        double startTime;
+
         AudioProcessorValueTreeState::SliderAttachment gainAttachment, delayAttachment;
         Colour backgroundColour;
 
@@ -533,8 +602,7 @@ private:
         {
             MemoryOutputStream displayText;
 
-            displayText << "[" << SystemStats::getJUCEVersion() << "]   "
-            << String (pos.bpm, 2) << " bpm, "
+            displayText << String (pos.bpm, 2) << " bpm, "
             << pos.timeSigNumerator << '/' << pos.timeSigDenominator
             << "  -  " << timeToTimecodeString (pos.timeInSeconds)
             << "  -  " << quarterNotePositionToBarsBeatsString (pos.ppqPosition,
