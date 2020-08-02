@@ -171,6 +171,8 @@ private:
     double angleDelta   = 0.0;
     double level        = 0.0;
     double tailOff      = 0.0;
+
+
 };
 
 //==============================================================================
@@ -216,6 +218,14 @@ public:
         return true;
     }
 
+    juce::AudioParameterFloat* speed;
+    int currentNote, lastNoteValue;
+    int time;
+    float rate;
+    juce::SortedSet<int> notes;
+
+
+
     void prepareToPlay (double newSampleRate, int /*samplesPerBlock*/) override
     {
         // Use this method as the place to do any pre-playback
@@ -235,6 +245,18 @@ public:
         }
 
         reset();
+
+        juce::AudioParameterFloat* speed;
+        int currentNote, lastNoteValue;
+        int time;
+        float rate;
+        juce::SortedSet<int> notes;
+
+        notes.clear();                          // [1]
+        currentNote = 0;                        // [2]
+        lastNoteValue = -1;                     // [3]
+        time = 0;                               // [4]
+        rate = static_cast<float> (newSampleRate); // [5]
     }
 
     void releaseResources() override
@@ -251,19 +273,60 @@ public:
         delayBufferFloat .clear();
         delayBufferDouble.clear();
     }
-
+    
     //==============================================================================
     void processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages) override
     {
+        
         jassert (! isUsingDoublePrecision());
+        /*
+        AudioPlayHead::CurrentPositionInfo pos = lastPosInfo.get();//再生位置
+        buffer.clear(); //オーディオバッファ初期化
+        midiMessages.clear();
+        MidiBuffer processedMidi; 
+        //MidiMessage message;
+        int time;
+        auto beats = (fmod(pos.ppqPosition, pos.timeSigNumerator) / pos.timeSigNumerator) * pos.timeSigDenominator;
+
+        auto bar = ((int)pos.ppqPosition) / pos.timeSigNumerator + 1;
+        auto beat = ((int)beats) + 1;
+        auto ticks = ((int)(fmod(beats, 1.0) * 960.0 + 0.5));
+        
+
+        while(pos.isPlaying){
+            jassert(buffer.getNumChannels() == 0);                                                         // [6]
+
+            // however we use the buffer to get timing information
+            auto numSamples = buffer.getNumSamples();                                                       // [7]
+
+            // get note duration
+            auto noteDuration = static_cast<int> (std::ceil(rate * 0.25f * (0.1f + (1.0f - (*speed)))));   // [8]
+            auto offset = juce::jmax(0, juce::jmin((int)(noteDuration - time), numSamples - 1));     // [12]
+
+            if (beat == 3 && ticks == 0) {
+
+                processedMidi.addEvent(juce::MidiMessage::noteOff(1, 50), offset);
+                lastNoteValue = -1;
+            
+            }
+
+            if (beat == 1 && ticks == 0) {
+                currentNote = (currentNote + 1) % notes.size();
+                lastNoteValue = notes[currentNote];
+                processedMidi.addEvent(MidiMessage::noteOn(1, 50, (uint8)127), offset);
+
+            }
+        }
+        midiMessages = processedMidi;
+
+        */
+
+        
         process (buffer, midiMessages, delayBufferFloat);
+        
     }
 
-    void processBlock (AudioBuffer<double>& buffer, MidiBuffer& midiMessages) override
-    {
-        jassert (isUsingDoublePrecision());
-        process (buffer, midiMessages, delayBufferDouble);
-    }
+
 
     //==============================================================================
     bool hasEditor() const override                                   { return true; }
@@ -509,13 +572,13 @@ private:
             auto HeaderHeight = 26;
             timecodeDisplayLabel.setBounds(r.removeFromTop(HeaderHeight));
 
-            //左右のボタン
+            //楽譜
+            auto scoreArea  = r.removeFromTop(r.getHeight() / 3);
+
+                        //左右のボタン
             auto sideWidth = 40;
             Button_L.setBounds(r.removeFromLeft(sideWidth));
             Button_R.setBounds(r.removeFromRight(sideWidth));
-
-            //楽譜
-            auto scoreArea  = r.removeFromTop(r.getHeight() / 3);
 
             //コードボタン
             auto chordArea = r.removeFromTop(r.getHeight() / 3);
