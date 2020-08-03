@@ -805,6 +805,7 @@ private:
     template <typename FloatType>
     void process (AudioBuffer<FloatType>& buffer, MidiBuffer& midiMessages, AudioBuffer<FloatType>& delayBuffer)
     {
+        /*
         auto gainParamValue  = state.getParameter ("gain") ->getValue();
         auto delayParamValue = state.getParameter ("delay")->getValue();
         auto numSamples = buffer.getNumSamples();
@@ -827,6 +828,7 @@ private:
 
         // Apply our gain change to the outgoing data..
         applyGain (buffer, delayBuffer, gainParamValue);
+        */
 
         // Now ask the host for the current time so we can store it to be displayed later...
         updateCurrentTimeInfoFromHost();
