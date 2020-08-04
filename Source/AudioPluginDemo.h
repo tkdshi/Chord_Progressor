@@ -279,13 +279,14 @@ public:
     {
         
         jassert (! isUsingDoublePrecision());
-        /*
+        
+
+        
         AudioPlayHead::CurrentPositionInfo pos = lastPosInfo.get();//再生位置
         buffer.clear(); //オーディオバッファ初期化
         midiMessages.clear();
         MidiBuffer processedMidi; 
         //MidiMessage message;
-        int time;
         auto beats = (fmod(pos.ppqPosition, pos.timeSigNumerator) / pos.timeSigNumerator) * pos.timeSigDenominator;
 
         auto bar = ((int)pos.ppqPosition) / pos.timeSigNumerator + 1;
@@ -293,7 +294,8 @@ public:
         auto ticks = ((int)(fmod(beats, 1.0) * 960.0 + 0.5));
         
 
-        while(pos.isPlaying){
+        if(pos.isPlaying){
+            /*
             jassert(buffer.getNumChannels() == 0);                                                         // [6]
 
             // however we use the buffer to get timing information
@@ -316,9 +318,31 @@ public:
                 processedMidi.addEvent(MidiMessage::noteOn(1, 50, (uint8)127), offset);
 
             }
+            */
+            
         }
-        midiMessages = processedMidi;
+                midiMessages = processedMidi;
+        
 
+
+        
+
+
+
+
+        
+
+        /*
+        AudioPlayHead::CurrentPositionInfo pos = lastPosInfo.get();//再生位置
+        int noteNumber = 50;
+        auto message = juce::MidiMessage::noteOn(1, noteNumber, (uint8)127);
+        auto timestamp = message.getTimeStamp();
+        double sampleRate = 44100.0;
+        auto sampleNumber = (int)(timestamp * sampleRate);
+
+       
+
+        midiMessages.addEvent(message, sampleNumber);
         */
 
         
@@ -614,7 +638,7 @@ private:
             auto staterow1 = stateArea.removeFromTop(stateArea.getHeight() / 2);
             auto staterow2 = stateArea.removeFromTop(stateArea.getHeight());
             
-            timecodeDisplayLabel.setBounds(staterow1.removeFromLeft(staterow1.getWidth()));
+            timecodeDisplayLabel.setBounds(staterow1.removeFromLeft(staterow1.getWidth()));  
             tempoDisplayLabel.setBounds(staterow2.removeFromLeft(staterow2.getWidth()));
 
             auto sliderArea = r.removeFromTop (60);
