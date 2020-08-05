@@ -7,7 +7,7 @@
 */
 
 #include <JuceHeader.h>
-#include "AudioPluginDemo.h"
+#include "Chordp.h"
 
 //==============================================================================
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()

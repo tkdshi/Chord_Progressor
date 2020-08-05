@@ -5,12 +5,14 @@
               projectType="audioplug" pluginAUIsSandboxSafe="1" pluginManufacturer="JUCE"
               pluginFormats="buildVST3,buildAU,buildStandalone,buildAUv3" pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn,pluginProducesMidiOut,pluginEditorRequiresKeys"
               useAppConfig="0" addUsingNamespaceToJuceHeader="1" id="PwKbCn"
-              jucerFormatVersion="1">
+              jucerFormatVersion="1" includeBinaryInJuceHeader="1">
   <MAINGROUP id="mkB8C0" name="AudioPluginDemo">
+    <GROUP id="{DE2C50F0-DBB8-2A9D-B7BF-02E27E18E145}" name="assets">
+      <FILE id="iaHB50" name="background.png" compile="0" resource="1" file="Source/assets/background.png"/>
+    </GROUP>
     <GROUP id="{C6047B69-E581-1884-F314-E164E39EC31F}" name="Source">
       <FILE id="Lc6n71" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
-      <FILE id="sLV959" name="AudioPluginDemo.h" compile="0" resource="0"
-            file="Source/AudioPluginDemo.h"/>
+      <FILE id="sLV959" name="Chordp.h" compile="0" resource="0" file="Source/Chordp.h"/>
     </GROUP>
   </MAINGROUP>
   <MODULES>

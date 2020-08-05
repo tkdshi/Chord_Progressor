@@ -282,10 +282,11 @@ public:
         
 
         
-        AudioPlayHead::CurrentPositionInfo pos = lastPosInfo.get();//Ä¶ˆÊ’u
-        buffer.clear(); //ƒI[ƒfƒBƒIƒoƒbƒtƒ@‰Šú‰»
+        AudioPlayHead::CurrentPositionInfo pos = lastPosInfo.get();//Ã„Â¶Ë†ÃŠâ€™u
+        buffer.clear(); //Æ’I[Æ’fÆ’BÆ’IÆ’oÆ’bÆ’tÆ’@â€°Å Ãºâ€°Â»
         midiMessages.clear();
         MidiBuffer processedMidi; 
+        MidiMessage message;
         //MidiMessage message;
         auto beats = (fmod(pos.ppqPosition, pos.timeSigNumerator) / pos.timeSigNumerator) * pos.timeSigDenominator;
 
@@ -294,8 +295,13 @@ public:
         auto ticks = ((int)(fmod(beats, 1.0) * 960.0 + 0.5));
         
 
+
+
+
+
+        /*
         if(pos.isPlaying){
-            /*
+
             jassert(buffer.getNumChannels() == 0);                                                         // [6]
 
             // however we use the buffer to get timing information
@@ -304,11 +310,11 @@ public:
             // get note duration
             auto noteDuration = static_cast<int> (std::ceil(rate * 0.25f * (0.1f + (1.0f - (*speed)))));   // [8]
             auto offset = juce::jmax(0, juce::jmin((int)(noteDuration - time), numSamples - 1));     // [12]
-
+            
             if (beat == 3 && ticks == 0) {
 
-                processedMidi.addEvent(juce::MidiMessage::noteOff(1, 50), offset);
-                lastNoteValue = -1;
+                //processedMidi.addEvent(juce::MidiMessage::noteOff(1, 50), offset);
+                //lastNoteValue = -1;
             
             }
 
@@ -318,10 +324,27 @@ public:
                 processedMidi.addEvent(MidiMessage::noteOn(1, 50, (uint8)127), offset);
 
             }
-            */
+            
             
         }
-                midiMessages = processedMidi;
+        */
+
+        for (MidiBuffer::Iterator itr(midiMessages); itr.getNextEvent(message, time);) {
+            if (message.isNoteOn()) {
+            
+            }
+            processedMidi.addEvent(message, time);
+
+            if (beats == 0) {
+
+            }
+        }
+
+
+        midiMessages.swapWith(processedMidi);
+
+
+            
         
 
 
@@ -333,7 +356,7 @@ public:
         
 
         /*
-        AudioPlayHead::CurrentPositionInfo pos = lastPosInfo.get();//Ä¶ˆÊ’u
+        AudioPlayHead::CurrentPositionInfo pos = lastPosInfo.get();//Ã„Â¶Ë†ÃŠâ€™u
         int noteNumber = 50;
         auto message = juce::MidiMessage::noteOn(1, noteNumber, (uint8)127);
         auto timestamp = message.getTimeStamp();
@@ -462,7 +485,7 @@ public:
 private:
     //==============================================================================
     /** This is the editor component that our filter will display. */
-    //GUI‚Ì•ÒW
+    //GUIâ€šÃŒâ€¢Ã’W
     class JuceDemoPluginAudioProcessorEditor  : public AudioProcessorEditor,
                                                 private Timer,
                                                 private Value::Listener
@@ -475,7 +498,7 @@ private:
               delayAttachment      (owner.state, "delay", delaySlider)
         {
 
-            //ƒ{ƒ^ƒ“‚Ì“à—e•\¦
+            //ä½¿ã†ãƒœã‚¿ãƒ³ã®å‰²å½“ã¦
             addAndMakeVisible(Button_c1);
             Button_c1.setButtonText("C");
             Button_c1.onClick = [this] { setNoteNumber(36); };
@@ -579,32 +602,41 @@ private:
         ~JuceDemoPluginAudioProcessorEditor() override {}
 
         //==============================================================================
+       //èƒŒæ™¯ã®æç”»
         void paint (Graphics& g) override
         {
-            g.setColour (backgroundColour);
+            //g.setColour (backgroundColour);
             g.fillAll();
+
+            //Imageã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ç”Ÿæˆ
+            image_background = ImageCache::getFromMemory(BinaryData::background_png, BinaryData::background_pngSize);
+
+            //Imageã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®æç”»
+            g.drawImageWithin(image_background, 0, 0, image_background.getWidth(), image_background.getHeight(), RectanglePlacement::yTop, false);
         }
 
-        //•`‰æ“à—e
+        //ãƒœã‚¿ãƒ³ãªã©ã®æç”»
         void resized() override
         {
             // This lays out our child components...
+            
+            
 
             auto r = getLocalBounds().reduced (8);
             
-            //ƒwƒbƒ_•”•ª
+            //Æ’wÆ’bÆ’_â€¢â€â€¢Âª
             auto HeaderHeight = 26;
             timecodeDisplayLabel.setBounds(r.removeFromTop(HeaderHeight));
 
-            //Šy•ˆ
+            //Å yâ€¢Ë†
             auto scoreArea  = r.removeFromTop(r.getHeight() / 3);
 
-                        //¶‰E‚Ìƒ{ƒ^ƒ“
+                        //Â¶â€°Eâ€šÃŒÆ’{Æ’^Æ’â€œ
             auto sideWidth = 40;
             Button_L.setBounds(r.removeFromLeft(sideWidth));
             Button_R.setBounds(r.removeFromRight(sideWidth));
 
-            //ƒR[ƒhƒ{ƒ^ƒ“
+            //Æ’R[Æ’hÆ’{Æ’^Æ’â€œ
             auto chordArea = r.removeFromTop(r.getHeight() / 3);
             Button_c1.setBounds(chordArea.removeFromLeft(chordArea.getWidth()/4));
             Button_c2.setBounds(chordArea.removeFromLeft(chordArea.getWidth() / 3));
@@ -612,14 +644,14 @@ private:
             Button_c4.setBounds(chordArea.removeFromLeft(chordArea.getWidth() / 1));
 
 
-            //ƒŠƒYƒ€ƒ{ƒ^ƒ“
+            //Æ’Å Æ’YÆ’â‚¬Æ’{Æ’^Æ’â€œ
             auto rythmArea = r.removeFromTop(r.getHeight() / 3);
             Button_r1.setBounds(rythmArea.removeFromLeft(rythmArea.getWidth()/4));
             Button_r2.setBounds(rythmArea.removeFromLeft(rythmArea.getWidth()/3));
             Button_r3.setBounds(rythmArea.removeFromLeft(rythmArea.getWidth()/2));
             Button_r4.setBounds(rythmArea.removeFromLeft(rythmArea.getWidth()/1));
 
-            //ƒWƒƒƒ“ƒ‹•”•ª
+            //Æ’WÆ’Æ’Æ’â€œÆ’â€¹â€¢â€â€¢Âª
             auto genreArea = r.removeFromLeft(r.getWidth() / 2);
             auto genrerow1 = genreArea.removeFromTop(genreArea.getHeight() / 2);
             auto genrerow2 = genreArea.removeFromTop(genreArea.getHeight() / 1);
@@ -633,7 +665,7 @@ private:
             Button_g8.setBounds(genrerow2.removeFromLeft(genrerow2.getWidth()/1));
 
             
-            //ƒeƒ“ƒ|‚È‚Ç•\¦
+            //Æ’eÆ’â€œÆ’|â€šÃˆâ€šÃ‡â€¢\Å½Â¦
             auto stateArea = r.removeFromLeft(r.getWidth() / 1);
             auto staterow1 = stateArea.removeFromTop(stateArea.getHeight() / 2);
             auto staterow2 = stateArea.removeFromTop(stateArea.getHeight());
@@ -647,11 +679,12 @@ private:
             //midiKeyboard.setBounds(r.removeFromBottom(70));
 
 
-            //ƒ{ƒgƒ€•”•ª
+            //Æ’{Æ’gÆ’â‚¬â€¢â€â€¢Âª
 
 
             lastUIWidth  = getWidth();
             lastUIHeight = getHeight();
+            
         }
 
         void timerCallback() override
@@ -689,7 +722,7 @@ private:
 
 
         //--------------------
-        //midiŠÖ˜A‚ÌƒRƒ“ƒ|[ƒlƒ“ƒg
+        //midiÅ Ã–ËœAâ€šÃŒÆ’RÆ’â€œÆ’|[Æ’lÆ’â€œÆ’g
         static juce::String getMidiMessageDescription(const juce::MidiMessage& m)
         {
             if (m.isNoteOn())           return "Note on " + juce::MidiMessage::getMidiNoteName(m.getNoteNumber(), true, true, 3);
@@ -727,7 +760,7 @@ private:
               gainLabel  { {}, "Throughput level:" },
               delayLabel { {}, "Delay:" };
 
-        //g—p‚·‚éƒRƒ“ƒ|[ƒlƒ“ƒg‚ÌéŒ¾
+        //Å½gâ€”pâ€šÂ·â€šÃ©Æ’RÆ’â€œÆ’|[Æ’lÆ’â€œÆ’gâ€šÃŒÃ©Å’Â¾
         Label TempoLabel;
         Slider gainSlider, delaySlider;
         TextButton Button_c1;
@@ -748,6 +781,8 @@ private:
         TextButton Button_g8;
         TextButton Button_L;
         TextButton Button_R;
+
+        Image image_background;
 
         int midiChannel = 10;
         double startTime;
@@ -800,7 +835,7 @@ private:
         void updateTimecodeDisplay (AudioPlayHead::CurrentPositionInfo pos)
         {
             MemoryOutputStream displayText;
-            MemoryOutputStream displayText2; //ƒeƒ“ƒ|
+            MemoryOutputStream displayText2; //Æ’eÆ’â€œÆ’|
 
             displayText  << pos.timeSigNumerator << '/' << pos.timeSigDenominator
             << "  -  " << timeToTimecodeString (pos.timeInSeconds)
