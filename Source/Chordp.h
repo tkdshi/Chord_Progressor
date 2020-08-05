@@ -582,7 +582,7 @@ private:
             timecodeDisplayLabel.setFont (Font (Font::getDefaultMonospacedFontName(), 15.0f, Font::plain));
 
             // set resize limits for this plug-in
-            setResizeLimits (400, 200, 1024, 700);
+            setResizeLimits (800, 600, 800, 600);
 
             lastUIWidth .referTo (owner.state.state.getChildWithName ("uiState").getPropertyAsValue ("width",  nullptr));
             lastUIHeight.referTo (owner.state.state.getChildWithName ("uiState").getPropertyAsValue ("height", nullptr));
@@ -624,32 +624,40 @@ private:
 
             auto r = getLocalBounds().reduced (8);
             
-            //ƒwƒbƒ_•”•ª
-            auto HeaderHeight = 26;
-            timecodeDisplayLabel.setBounds(r.removeFromTop(HeaderHeight));
+            //ヘッダ部分
+            auto headerArea = r.removeFromTop(80);
 
-            //Šy•ˆ
-            auto scoreArea  = r.removeFromTop(r.getHeight() / 3);
+            //楽譜部分
+            auto scoreArea = r.removeFromTop(160);
+
 
                         //¶‰E‚Ìƒ{ƒ^ƒ“
-            auto sideWidth = 40;
+            auto sideWidth = 25;
             Button_L.setBounds(r.removeFromLeft(sideWidth));
             Button_R.setBounds(r.removeFromRight(sideWidth));
 
+
+            auto margin1 = r.removeFromTop(30);
+
             //ƒR[ƒhƒ{ƒ^ƒ“
-            auto chordArea = r.removeFromTop(r.getHeight() / 3);
+            auto chordArea = r.removeFromTop(70);
             Button_c1.setBounds(chordArea.removeFromLeft(chordArea.getWidth()/4));
             Button_c2.setBounds(chordArea.removeFromLeft(chordArea.getWidth() / 3));
             Button_c3.setBounds(chordArea.removeFromLeft(chordArea.getWidth() / 2));
             Button_c4.setBounds(chordArea.removeFromLeft(chordArea.getWidth() / 1));
 
+            auto margin2 = r.removeFromTop(10);
+
 
             //ƒŠƒYƒ€ƒ{ƒ^ƒ“
-            auto rythmArea = r.removeFromTop(r.getHeight() / 3);
+            auto rythmArea = r.removeFromTop(40);
             Button_r1.setBounds(rythmArea.removeFromLeft(rythmArea.getWidth()/4));
             Button_r2.setBounds(rythmArea.removeFromLeft(rythmArea.getWidth()/3));
             Button_r3.setBounds(rythmArea.removeFromLeft(rythmArea.getWidth()/2));
             Button_r4.setBounds(rythmArea.removeFromLeft(rythmArea.getWidth()/1));
+
+
+            auto margin3 = r.removeFromTop(10);
 
             //ƒWƒƒƒ“ƒ‹•”•ª
             auto genreArea = r.removeFromLeft(r.getWidth() / 2);
