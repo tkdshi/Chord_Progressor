@@ -458,6 +458,10 @@ public:
         //==============================================================================
     };
 
+
+
+
+
     //==============================================================================
     // These properties are public so that our editor component can access them
     // A bit of a hacky way to do it, but it's only a demo! Obviously in your own
@@ -478,11 +482,23 @@ private:
     //==============================================================================
     /** This is the editor component that our filter will display. */
     //GUI‚Ì•ÒW
-    class JuceDemoPluginAudioProcessorEditor  : public AudioProcessorEditor,
-                                                private Timer,
-                                                private Value::Listener
+    class JuceDemoPluginAudioProcessorEditor : public AudioProcessorEditor,
+        private Timer,
+        private Value::Listener,
+        private Button::Listener
     {
     public:
+
+        int Chord_Value[8][2] = { {0,0},{7,0},{9,1},{4,1},{3,3},{0,0},{4,1},{7,0} };
+        int Page = 0;
+        const String Chord_Name[12] = { "C","C#","D" ,"D#" ,"E" ,"F" ,"F#" ,"G" ,"G#" ,"A" ,"A#" ,"B" };
+        const String Chord_Type[4] = { "","m","M7","m7" };
+
+        const int Chord_M[4] = { 0,4,7,-1 };
+        const int Chord_m[4] = { 0,3,7,-1 };
+        const int Chord_M7[4] = { 0,4,7,11 };
+        const int Chord_m7[4] = { 0,3,7,10 };
+
         JuceDemoPluginAudioProcessorEditor (JuceDemoPluginAudioProcessor& owner)
             : AudioProcessorEditor (owner),
               midiKeyboard         (owner.keyboardState, MidiKeyboardComponent::horizontalKeyboard),
@@ -492,19 +508,19 @@ private:
 
             //Using Button Attach
             addAndMakeVisible(Button_c1);
-            Button_c1.setButtonText("C");
+            Button_c1.setButtonText(Chord_Name[Chord_Value[0+Page][0]]  + Chord_Type[Chord_Value[0+Page][1]]);
             Button_c1.onClick = [this] { setNoteNumber(36); };
 
             addAndMakeVisible(Button_c2);
-            Button_c2.setButtonText("G");
+            Button_c2.setButtonText(Chord_Name[Chord_Value[1 + Page][0]] + Chord_Type[Chord_Value[1 + Page][1]]);
             Button_c2.onClick = [this] { setNoteNumber(36); };
 
             addAndMakeVisible(Button_c3);
-            Button_c3.setButtonText("Am");
+            Button_c3.setButtonText(Chord_Name[Chord_Value[2 + Page][0]] + Chord_Type[Chord_Value[2 + Page][1]]);
             Button_c3.onClick = [this] { setNoteNumber(36); };
 
             addAndMakeVisible(Button_c4);
-            Button_c4.setButtonText("Em");
+            Button_c4.setButtonText(Chord_Name[Chord_Value[3 + Page][0]] + Chord_Type[Chord_Value[3 + Page][1]]);
             Button_c4.onClick = [this] { setNoteNumber(36); };
 
             addAndMakeVisible(Button_r1);
@@ -581,7 +597,6 @@ private:
 
             // set our component's initial size to be the last one that was stored in the filter's settings
             
-            //setSize (lastUIWidth.getValue(), lastUIHeight.getValue());
             //setSize (lastUIWidth.getValue(), lastUIHeight.getValue());
 
             lastUIWidth. addListener (this);
@@ -720,6 +735,8 @@ private:
             repaint();
         }
 
+
+
     private:
 
 
@@ -760,7 +777,13 @@ private:
 
         void buttonClicked(Button* clickedButton) {
 
+
+
+
+
         }
+
+
 
 
 
@@ -987,9 +1010,9 @@ private:
 
     static BusesProperties getBusesProperties()
     {
-        return BusesProperties().withInput  ("Input",  AudioChannelSet::stereo(), true)
+        return BusesProperties().withInput  ("Input",  AudioChannelSet::stereo(), false)
                                 .withOutput ("Output", AudioChannelSet::stereo(), true);
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceDemoPluginAudioProcessor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(JuceDemoPluginAudioProcessor);
 };
