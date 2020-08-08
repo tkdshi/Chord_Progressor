@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT name="AudioPluginDemo" companyName="JUCE" version="1.0.0" userNotes="Synthesiser audio plugin."
+<JUCERPROJECT name="Chordp" companyName="JUCE" version="1.0.0" userNotes="Synthesiser audio plugin."
               companyWebsite="http://juce.com" displaySplashScreen="1" defines="PIP_JUCE_EXAMPLES_DIRECTORY=QzpcVXNlcnNcc2hpbmdcRG9jdW1lbnRzXHByb2dcSlVDRVxleGFtcGxlcw=="
               projectType="audioplug" pluginAUIsSandboxSafe="1" pluginManufacturer="JUCE"
               pluginFormats="buildVST3,buildAU,buildStandalone,buildAUv3" pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn,pluginProducesMidiOut,pluginEditorRequiresKeys"
               useAppConfig="0" addUsingNamespaceToJuceHeader="1" id="PwKbCn"
               jucerFormatVersion="1" includeBinaryInJuceHeader="1">
-  <MAINGROUP id="mkB8C0" name="AudioPluginDemo">
+  <MAINGROUP id="mkB8C0" name="Chordp">
     <GROUP id="{DE2C50F0-DBB8-2A9D-B7BF-02E27E18E145}" name="assets">
       <FILE id="iaHB50" name="background.png" compile="0" resource="1" file="Source/assets/background.png"/>
+      <FILE id="XI1Izo" name="piano.mp3" compile="0" resource="1" file="Source/assets/piano.mp3"/>
     </GROUP>
     <GROUP id="{C6047B69-E581-1884-F314-E164E39EC31F}" name="Source">
       <FILE id="Lc6n71" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>

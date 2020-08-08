@@ -489,13 +489,13 @@ private:
     {
     public:
 
-        int Chord_Value[8][2] = { {0,0},{7,0},{9,1},{4,1},{3,3},{0,0},{4,1},{7,0} };
+        int Chord_Value[8][2] = { {0,0},{7,0},{9,1},{4,1},{3,0},{0,0},{4,1},{7,0} };
         int Page = 0;
         const String Chord_Name[12] = { "C","C#","D" ,"D#" ,"E" ,"F" ,"F#" ,"G" ,"G#" ,"A" ,"A#" ,"B" };
         const String Chord_Type[4] = { "","m","M7","m7" };
 
-        const int Chord_M[4] = { 0,4,7,-1 };
-        const int Chord_m[4] = { 0,3,7,-1 };
+        const int Chord_M[3] = { 0,4,7};
+        const int Chord_m[3] = { 0,3,7};
         const int Chord_M7[4] = { 0,4,7,11 };
         const int Chord_m7[4] = { 0,3,7,10 };
 
@@ -574,13 +574,6 @@ private:
 
             addAndMakeVisible (delaySlider);
             delaySlider.setSliderStyle (Slider::Rotary);
-
-            // add some labels for the sliders..
-            gainLabel.attachToComponent (&gainSlider, false);
-            gainLabel.setFont (Font (11.0f));
-
-            delayLabel.attachToComponent (&delaySlider, false);
-            delayLabel.setFont (Font (11.0f));
 
             // add the midi keyboard component..
             addAndMakeVisible (midiKeyboard);
