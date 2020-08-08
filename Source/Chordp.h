@@ -345,15 +345,7 @@ public:
 
 
             
-        
 
-
-        
-
-
-
-
-        
 
         /*
         AudioPlayHead::CurrentPositionInfo pos = lastPosInfo.get();//Ä¶ˆÊ’u
@@ -498,7 +490,7 @@ private:
               delayAttachment      (owner.state, "delay", delaySlider)
         {
 
-            //使うボタンの割当て
+            //Using Button Attach
             addAndMakeVisible(Button_c1);
             Button_c1.setButtonText("C");
             Button_c1.onClick = [this] { setNoteNumber(36); };
@@ -588,7 +580,9 @@ private:
             lastUIHeight.referTo (owner.state.state.getChildWithName ("uiState").getPropertyAsValue ("height", nullptr));
 
             // set our component's initial size to be the last one that was stored in the filter's settings
-            setSize (lastUIWidth.getValue(), lastUIHeight.getValue());
+            
+            //setSize (lastUIWidth.getValue(), lastUIHeight.getValue());
+            //setSize (lastUIWidth.getValue(), lastUIHeight.getValue());
 
             lastUIWidth. addListener (this);
             lastUIHeight.addListener (this);
@@ -631,7 +625,7 @@ private:
             auto scoreArea = r.removeFromTop(160);
 
 
-                        //¶‰E‚Ìƒ{ƒ^ƒ“
+            //¶‰E‚Ìƒ{ƒ^ƒ“
             auto sideWidth = 25;
             Button_L.setBounds(r.removeFromLeft(sideWidth));
             Button_R.setBounds(r.removeFromRight(sideWidth));
@@ -762,6 +756,17 @@ private:
             message.setTimeStamp(juce::Time::getMillisecondCounterHiRes() * 0.001 - startTime);
         }
 
+
+
+        void buttonClicked(Button* clickedButton) {
+
+        }
+
+
+
+
+
+
         MidiKeyboardComponent midiKeyboard;
 
         Label timecodeDisplayLabel, tempoDisplayLabel,
@@ -864,7 +869,7 @@ private:
         // called when the stored window size changes
         void valueChanged (Value&) override
         {
-            setSize (lastUIWidth.getValue(), lastUIHeight.getValue());
+            setSize (800,600);
         }
     };
 
