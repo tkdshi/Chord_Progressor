@@ -225,22 +225,22 @@ public:
     juce::SortedSet<int> notes;
 
 
-
+    // プラグインをロードした時やホスト側のセットアップ処理を実行した時にホストから呼び出される。
     void prepareToPlay (double newSampleRate, int samplesPerBlock) override
     {
-        // Use this method as the place to do any pre-playback
-        // initialisation that you need..
+        // Synthesiserオブジェクトにホストアプリケーションのサンプリングレートをセットする
         synth.setCurrentPlaybackSampleRate (newSampleRate);
+        // MidiKeyboardStateオブジェクトの状態を初期化する
         keyboardState.reset();
 
     
     }
-
+    // プラグインを非アクティブ化した時や削除する時にホストから呼び出される。
     void releaseResources() override
     {
-        // When playback stops, you can use this as an opportunity to free up any
-        // spare memory, etc.
+        // MidiKeyboardStateオブジェクトをオール・ノートOFF状態にする
         keyboardState.allNotesOff(0);
+        // MidiKeyboardStateオブジェクトの状態を初期化する
         keyboardState.reset();
     }
 
@@ -253,6 +253,8 @@ public:
     }
     
     //==============================================================================
+
+    //アプリケーションからオーディオバッファとMIDIバッファの参照を取得してオーディオレンダリングを実行
     void processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages) override
     {
         
@@ -265,13 +267,14 @@ public:
         int totalNumInputChannels = getTotalNumInputChannels();
         int totalNumOutputChannels = getTotalNumOutputChannels();
         
-
+        // MidiKeyboardStateオブジェクトのMIDIメッセージとMIDIバッファのMIDIメッセージをマージする
         keyboardState.processNextMidiBuffer(midiMessages, 0,buffer.getNumSamples(), true);
 
+        // オーディオバッファのサンプルデータをクリア
         for (auto i = totalNumInputChannels; i < totalNumOutputChannels; i++) {
             buffer.clear(i, 0, buffer.getNumSamples());
         }
-        
+        //    // Synthesiserオブジェクトにオーディオバッファの参照とMIDIバッファの参照を渡して、オーディオレンダリング
         synth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
     }
 
@@ -286,7 +289,7 @@ public:
     }
 
     //==============================================================================
-    const String getName() const override                             { return "AudioPluginDemo"; }
+    const String getName() const override                             { return "Chord Progressor"; }
     bool acceptsMidi() const override                                 { return true; }
     bool producesMidi() const override                                { return true; }
     double getTailLengthSeconds() const override                      { return 0.0; }
@@ -472,7 +475,7 @@ private:
     public:
 
         int Chord_Value[8][2] = { {0,3},{7,0},{9,1},{4,1},{3,0},{0,0},{4,1},{7,0} };
-        int Page = 0;
+        int Page = 1 * 4;
         const String Chord_Name[12] = { "C","C#","D" ,"D#" ,"E" ,"F" ,"F#" ,"G" ,"G#" ,"A" ,"A#" ,"B" };
         const String Chord_Type[4] = { "","m","M7","m7" };
 
