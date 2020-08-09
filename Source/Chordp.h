@@ -145,11 +145,15 @@ public:
     }
     
     //==============================================================================
+    int beat_position[4] = { 0,0,0,0 };
 
     //アプリケーションからオーディオバッファとMIDIバッファの参照を取得してオーディオレンダリングを実行
     void processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages) override
     {
-        
+            
+
+
+
         if (isChanging) {
             return;
         }
@@ -158,6 +162,31 @@ public:
 
         int totalNumInputChannels = getTotalNumInputChannels();
         int totalNumOutputChannels = getTotalNumOutputChannels();
+
+
+        //midiメッセージを追加
+
+            //ノートオン
+        if (beat_position[0] != beat_position[1]) {
+            MidiMessage message[4];
+            message[0] = juce::MidiMessage::noteOn(1, 50/*noteNumber*/, (uint8)127);
+            message[1] = juce::MidiMessage::noteOn(1, 50 + 4/*noteNumber*/, (uint8)127);
+            message[2] = juce::MidiMessage::noteOn(1, 50 + 7/*noteNumber*/, (uint8)127);
+            midiMessages.addEvent(message[0], 0/*sample number*/);
+            midiMessages.addEvent(message[1], 0/*sample number*/);
+            midiMessages.addEvent(message[2], 0/*sample number*/);
+        }
+            //ノートオフ
+            /*
+            auto messageOff = juce::MidiMessage::noteOff(message.getChannel(), message.getNoteNumber());
+            addMessageToBuffer(messageOff);
+            */
+
+
+
+
+
+
         
         // MidiKeyboardStateオブジェクトのMIDIメッセージとMIDIバッファのMIDIメッセージをマージする
         keyboardState.processNextMidiBuffer(midiMessages, 0,buffer.getNumSamples(), true);
@@ -169,7 +198,7 @@ public:
         //    // Synthesiserオブジェクトにオーディオバッファの参照とMIDIバッファの参照を渡して、オーディオレンダリング
         synth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
 
-        updateCurrentTimeInfoFromHost();
+        updateCurrentTimeInfoFromHost(beat_position);
     }
 
   
@@ -357,6 +386,7 @@ public:
     // Our plug-in's current state
     AudioProcessorValueTreeState state;
 
+
 private:
     //==============================================================================
     /** This is the editor component that our filter will display. */
@@ -387,6 +417,8 @@ private:
         {{0,3},{7,0},{9,1},{4,1},{3,0},{0,0},{4,1},{7,0}}, };
 
         int g_push[8] = { 0,0,0,0,0,0,0,0 };
+
+
 
         int Page = 0;
         const String Chord_Name[12] = { "C","C#","D" ,"D#" ,"E" ,"F" ,"F#" ,"G" ,"G#" ,"A" ,"A#" ,"B" };
@@ -545,7 +577,7 @@ private:
             midiKeyboard.setBounds(scoreArea.removeFromLeft(scoreArea.getWidth()));
 
 
-            //¶‰E‚Ìƒ{ƒ^ƒ“
+            //左右のボタン
             auto sideWidth = 25;
             Button_L.setBounds(r.removeFromLeft(sideWidth));
             Button_R.setBounds(r.removeFromRight(sideWidth));
@@ -553,7 +585,7 @@ private:
 
             auto margin1 = r.removeFromTop(30);
 
-            //ƒR[ƒhƒ{ƒ^ƒ“
+            //コード部分
             auto chordArea = r.removeFromTop(70);
             Button_c1.setBounds(chordArea.removeFromLeft(chordArea.getWidth()/4));
             Button_c2.setBounds(chordArea.removeFromLeft(chordArea.getWidth() / 3));
@@ -563,7 +595,7 @@ private:
             auto margin2 = r.removeFromTop(10);
 
 
-            //ƒŠƒYƒ€ƒ{ƒ^ƒ“
+            //コードの種類部分
             auto rythmArea = r.removeFromTop(40);
             Button_r1.setBounds(rythmArea.removeFromLeft(rythmArea.getWidth()/4));
             Button_r2.setBounds(rythmArea.removeFromLeft(rythmArea.getWidth()/3));
@@ -573,7 +605,7 @@ private:
 
             auto margin3 = r.removeFromTop(10);
 
-            //ƒWƒƒƒ“ƒ‹•”•ª
+            //ジャンル部分
             auto genreArea = r.removeFromLeft(r.getWidth() / 2);
             auto genrerow1 = genreArea.removeFromTop(genreArea.getHeight() / 2);
             auto genrerow2 = genreArea.removeFromTop(genreArea.getHeight() / 1);
@@ -587,7 +619,7 @@ private:
             Button_g8.setBounds(genrerow2.removeFromLeft(genrerow2.getWidth()/1));
 
             
-            //ƒeƒ“ƒ|‚È‚Ç•\Ž¦
+            //小節など
             auto stateArea = r.removeFromLeft(r.getWidth() / 1);
             auto staterow1 = stateArea.removeFromTop(stateArea.getHeight() / 2);
             auto staterow2 = stateArea.removeFromTop(stateArea.getHeight());
@@ -772,11 +804,13 @@ private:
             return juce::String::toHexString(m.getRawData(), m.getRawDataSize());
         }
 
-        void setNoteNumber(int noteNumber)
-        {
-            auto message = juce::MidiMessage::noteOn(midiChannel, noteNumber, (juce::uint8) 100);
-            message.setTimeStamp(juce::Time::getMillisecondCounterHiRes() * 0.001 - startTime);
-        }
+
+
+
+
+
+
+
 
 
 
@@ -940,7 +974,7 @@ private:
 
 
 
-    void updateCurrentTimeInfoFromHost()
+    void updateCurrentTimeInfoFromHost(int a[])
     {
         if (auto* ph = getPlayHead())
         {
@@ -949,6 +983,26 @@ private:
             if (ph->getCurrentPosition(newTime))
             {
                 lastPosInfo = newTime;  // Successfully got the current time from the host..
+
+
+
+                /*
+                pos.ppqPosition,
+                    pos.timeSigNumerator,
+                    pos.timeSigDenominator*/
+
+                auto quarterNotesPerBar = (newTime.timeSigNumerator * 4 / newTime.timeSigDenominator);
+                auto beats = (fmod(newTime.ppqPosition, quarterNotesPerBar) / quarterNotesPerBar) * newTime.timeSigNumerator;
+
+                int bar = (((((int)newTime.ppqPosition) / quarterNotesPerBar))%8); //0から7
+                int beat = ((((int)beats))%16) ; //0から16
+
+                a[1] = a[0];
+                a[0] = bar;
+                a[3] = a[2];
+                a[2] = beat;
+
+
                 return;
             }
         }
