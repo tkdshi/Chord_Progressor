@@ -226,43 +226,21 @@ public:
 
 
 
-    void prepareToPlay (double newSampleRate, int /*samplesPerBlock*/) override
+    void prepareToPlay (double newSampleRate, int samplesPerBlock) override
     {
         // Use this method as the place to do any pre-playback
         // initialisation that you need..
         synth.setCurrentPlaybackSampleRate (newSampleRate);
         keyboardState.reset();
 
-        if (isUsingDoublePrecision())
-        {
-            delayBufferDouble.setSize (2, 12000);
-            delayBufferFloat .setSize (1, 1);
-        }
-        else
-        {
-            delayBufferFloat .setSize (2, 12000);
-            delayBufferDouble.setSize (1, 1);
-        }
-
-        reset();
-
-        juce::AudioParameterFloat* speed;
-        int currentNote, lastNoteValue;
-        int time;
-        float rate;
-        juce::SortedSet<int> notes;
-
-        notes.clear();                          // [1]
-        currentNote = 0;                        // [2]
-        lastNoteValue = -1;                     // [3]
-        time = 0;                               // [4]
-        rate = static_cast<float> (newSampleRate); // [5]
+    
     }
 
     void releaseResources() override
     {
         // When playback stops, you can use this as an opportunity to free up any
         // spare memory, etc.
+        keyboardState.allNotesOff(0);
         keyboardState.reset();
     }
 
@@ -278,95 +256,27 @@ public:
     void processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages) override
     {
         
-        jassert (! isUsingDoublePrecision());
-        
-
-        
-        AudioPlayHead::CurrentPositionInfo pos = lastPosInfo.get();//Ä¶ˆÊ’u
-        buffer.clear(); //ƒI[ƒfƒBƒIƒoƒbƒtƒ@‰Šú‰»
-        midiMessages.clear();
-        MidiBuffer processedMidi; 
-        MidiMessage message;
-        //MidiMessage message;
-        auto beats = (fmod(pos.ppqPosition, pos.timeSigNumerator) / pos.timeSigNumerator) * pos.timeSigDenominator;
-
-        auto bar = ((int)pos.ppqPosition) / pos.timeSigNumerator + 1;
-        auto beat = ((int)beats) + 1;
-        auto ticks = ((int)(fmod(beats, 1.0) * 960.0 + 0.5));
-        
-
-
-
-
-
-        /*
-        if(pos.isPlaying){
-
-            jassert(buffer.getNumChannels() == 0);                                                         // [6]
-
-            // however we use the buffer to get timing information
-            auto numSamples = buffer.getNumSamples();                                                       // [7]
-
-            // get note duration
-            auto noteDuration = static_cast<int> (std::ceil(rate * 0.25f * (0.1f + (1.0f - (*speed)))));   // [8]
-            auto offset = juce::jmax(0, juce::jmin((int)(noteDuration - time), numSamples - 1));     // [12]
-            
-            if (beat == 3 && ticks == 0) {
-
-                //processedMidi.addEvent(juce::MidiMessage::noteOff(1, 50), offset);
-                //lastNoteValue = -1;
-            
-            }
-
-            if (beat == 1 && ticks == 0) {
-                currentNote = (currentNote + 1) % notes.size();
-                lastNoteValue = notes[currentNote];
-                processedMidi.addEvent(MidiMessage::noteOn(1, 50, (uint8)127), offset);
-
-            }
-            
-            
-        }
-        */
-
-        for (MidiBuffer::Iterator itr(midiMessages); itr.getNextEvent(message, time);) {
-            if (message.isNoteOn()) {
-            
-            }
-            processedMidi.addEvent(message, time);
-
-            if (beats == 0) {
-
-            }
+        if (isChanging) {
+            return;
         }
 
+        ScopedNoDenormals noDenormals;
 
-        midiMessages.swapWith(processedMidi);
-
-
-            
-
-
-        /*
-        AudioPlayHead::CurrentPositionInfo pos = lastPosInfo.get();//Ä¶ˆÊ’u
-        int noteNumber = 50;
-        auto message = juce::MidiMessage::noteOn(1, noteNumber, (uint8)127);
-        auto timestamp = message.getTimeStamp();
-        double sampleRate = 44100.0;
-        auto sampleNumber = (int)(timestamp * sampleRate);
-
-       
-
-        midiMessages.addEvent(message, sampleNumber);
-        */
-
+        int totalNumInputChannels = getTotalNumInputChannels();
+        int totalNumOutputChannels = getTotalNumOutputChannels();
         
-        process (buffer, midiMessages, delayBufferFloat);
+
+        keyboardState.processNextMidiBuffer(midiMessages, 0,buffer.getNumSamples(), true);
+
+        for (auto i = totalNumInputChannels; i < totalNumOutputChannels; i++) {
+            buffer.clear(i, 0, buffer.getNumSamples());
+        }
         
+        synth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
     }
 
-
-
+  
+    
     //==============================================================================
     bool hasEditor() const override                                   { return true; }
 
@@ -419,6 +329,70 @@ public:
         });
     }
 
+
+
+    //synthsizer setup
+    void setupSampler(AudioFormatReader& newReader) {
+        isChanging = true;
+
+        synth.clearSounds();
+        synth.clearVoices();
+
+        BigInteger allNotes;
+        allNotes.setRange(0, 128, true);
+
+        synth.addSound(new SamplerSound("default", newReader, allNotes, 60, 0, 0.1, 10.0));
+
+        for (int i = 0; i < 128; i++) {
+            synth.addVoice(new SamplerVoice());
+        }
+
+        isChanging = false;
+    }
+
+    void loadAudioFile() {
+
+        AudioFormatManager formatManager;
+        formatManager.registerBasicFormats();
+
+        MemoryInputStream* inputStream = new MemoryInputStream(BinaryData::piano_mp3, BinaryData::piano_mp3Size, true);
+
+        AudioFormatReader* reader = formatManager.createReaderFor(inputStream);
+
+        if (reader != nullptr) {
+            setupSampler(*reader);
+            delete reader;
+        }
+
+
+    }
+
+    void loadSampleFile() {
+        AudioFormatManager formatManager;
+        formatManager.registerBasicFormats();
+
+        FileChooser chooser("Open audio file to play.", File::nonexistent, formatManager.getWildcardForAllFormats());
+
+        if (chooser.browseForFileToOpen()) {
+            File file(chooser.getResult());
+            AudioFormatReader* reader = formatManager.createReaderFor(file);
+
+            if (reader != nullptr) {
+                setupSampler(*reader);
+                delete reader;
+            }
+        }
+
+
+    }
+
+    MidiKeyboardState& getMidiKeyboardState() {
+        return keyboardState;
+    }
+
+
+
+
     TrackProperties getTrackProperties() const
     {
         const ScopedLock sl (trackPropertiesLock);
@@ -435,10 +409,12 @@ public:
         // we'll be calling `set` much more frequently than `get`.
         void set (const AudioPlayHead::CurrentPositionInfo& newInfo)
         {
+            
             const juce::SpinLock::ScopedTryLockType lock (mutex);
 
             if (lock.isLocked())
                 info = newInfo;
+
         }
 
         AudioPlayHead::CurrentPositionInfo get() const noexcept
@@ -455,6 +431,7 @@ public:
 
 
 
+
         //==============================================================================
     };
 
@@ -466,6 +443,9 @@ public:
     // These properties are public so that our editor component can access them
     // A bit of a hacky way to do it, but it's only a demo! Obviously in your own
     // code you'll do this much more neatly..
+        //processblock skip
+
+    bool isChanging;
 
     // this is kept up to date with the midi messages that arrive, and the UI component
     // registers with it so it can represent the incoming messages
@@ -489,7 +469,7 @@ private:
     {
     public:
 
-        int Chord_Value[8][2] = { {0,0},{7,0},{9,1},{4,1},{3,0},{0,0},{4,1},{7,0} };
+        int Chord_Value[8][2] = { {0,3},{7,0},{9,1},{4,1},{3,0},{0,0},{4,1},{7,0} };
         int Page = 0;
         const String Chord_Name[12] = { "C","C#","D" ,"D#" ,"E" ,"F" ,"F#" ,"G" ,"G#" ,"A" ,"A#" ,"B" };
         const String Chord_Type[4] = { "","m","M7","m7" };
@@ -1003,7 +983,7 @@ private:
 
     static BusesProperties getBusesProperties()
     {
-        return BusesProperties().withInput  ("Input",  AudioChannelSet::stereo(), false)
+        return BusesProperties().withInput("Input", AudioChannelSet::stereo(), false)
                                 .withOutput ("Output", AudioChannelSet::stereo(), true);
     }
 
