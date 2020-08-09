@@ -80,11 +80,13 @@ public:
                    std::make_unique<AudioParameterFloat> ("delay", "Delay Feedback", NormalisableRange<float> (0.0f, 1.0f), 0.5f) })
     {
         // Add a sub-tree to store the state of our UI
+        lastPosInfo.resetToDefault();
+
         state.state.addChild ({ "uiState", { { "width",  400 }, { "height", 200 } }, {} }, -1, nullptr);
         loadAudioFile();
     }
 
-    ~JuceDemoPluginAudioProcessor() override = default;
+    ~JuceDemoPluginAudioProcessor() {}
 
     //==============================================================================
     bool isBusesLayoutSupported (const BusesLayout& layouts) const override
@@ -166,6 +168,8 @@ public:
         }
         //    // Synthesiserオブジェクトにオーディオバッファの参照とMIDIバッファの参照を渡して、オーディオレンダリング
         synth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
+
+        updateCurrentTimeInfoFromHost();
     }
 
   
@@ -348,7 +352,7 @@ public:
 
     // this keeps a copy of the last set of time info that was acquired during an audio
     // callback - the UI component will read this and display it.
-    SpinLockedPosInfo lastPosInfo;
+    AudioPlayHead::CurrentPositionInfo lastPosInfo;
 
     // Our plug-in's current state
     AudioProcessorValueTreeState state;
@@ -607,7 +611,7 @@ private:
 
         void timerCallback() override
         {
-            updateTimecodeDisplay (getProcessor().lastPosInfo.get());
+            updateTimecodeDisplay (getProcessor().lastPosInfo);
         }
 
         void hostMIDIControllerIsAvailable (bool controllerIsAvailable) override
@@ -718,6 +722,7 @@ private:
             }
 
             updateChordLabel();
+
 
             return push;
         }
@@ -885,37 +890,7 @@ private:
     };
 
     //==============================================================================
-    template <typename FloatType>
-    void process (AudioBuffer<FloatType>& buffer, MidiBuffer& midiMessages, AudioBuffer<FloatType>& delayBuffer)
-    {
-        /*
-        auto gainParamValue  = state.getParameter ("gain") ->getValue();
-        auto delayParamValue = state.getParameter ("delay")->getValue();
-        auto numSamples = buffer.getNumSamples();
 
-        // In case we have more outputs than inputs, we'll clear any output
-        // channels that didn't contain input data, (because these aren't
-        // guaranteed to be empty - they may contain garbage).
-        for (auto i = getTotalNumInputChannels(); i < getTotalNumOutputChannels(); ++i)
-            buffer.clear (i, 0, numSamples);
-
-        // Now pass any incoming midi messages to our keyboard state object, and let it
-        // add messages to the buffer if the user is clicking on the on-screen keys
-        keyboardState.processNextMidiBuffer (midiMessages, 0, numSamples, true);
-
-        // and now get our synth to process these midi events and generate its output.
-        synth.renderNextBlock (buffer, midiMessages, 0, numSamples);
-
-        // Apply our delay effect to the new output..
-        applyDelay (buffer, delayBuffer, delayParamValue);
-
-        // Apply our gain change to the outgoing data..
-        applyGain (buffer, delayBuffer, gainParamValue);
-        */
-
-        // Now ask the host for the current time so we can store it to be displayed later...
-        updateCurrentTimeInfoFromHost();
-    }
 
     template <typename FloatType>
     void applyGain (AudioBuffer<FloatType>& buffer, AudioBuffer<FloatType>& delayBuffer, float gainLevel)
@@ -967,23 +942,19 @@ private:
 
     void updateCurrentTimeInfoFromHost()
     {
-        const auto newInfo = [&]
+        if (auto* ph = getPlayHead())
         {
-            if (auto* ph = getPlayHead())
+            AudioPlayHead::CurrentPositionInfo newTime;
+
+            if (ph->getCurrentPosition(newTime))
             {
-                AudioPlayHead::CurrentPositionInfo result;
-
-                if (ph->getCurrentPosition (result))
-                    return result;
+                lastPosInfo = newTime;  // Successfully got the current time from the host..
+                return;
             }
+        }
 
-            // If the host fails to provide the current time, we'll just use default values
-            AudioPlayHead::CurrentPositionInfo result;
-            result.resetToDefault();
-            return result;
-        }();
-
-        lastPosInfo.set (newInfo);
+        // If the host fails to provide the current time, we'll just reset our copy to a default..
+        lastPosInfo.resetToDefault();
     }
 
     static BusesProperties getBusesProperties()
