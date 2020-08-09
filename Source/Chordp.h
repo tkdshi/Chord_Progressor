@@ -386,6 +386,8 @@ public:
 
     }
 
+
+
     MidiKeyboardState& getMidiKeyboardState() {
         return keyboardState;
     }
@@ -489,19 +491,19 @@ private:
             //Using Button Attach
             addAndMakeVisible(Button_c1);
             Button_c1.setButtonText(Chord_Name[Chord_Value[0+Page][0]]  + Chord_Type[Chord_Value[0+Page][1]]);
-            Button_c1.onClick = [this] { setNoteNumber(36); };
+            Button_c1.addListener(this);
 
             addAndMakeVisible(Button_c2);
             Button_c2.setButtonText(Chord_Name[Chord_Value[1 + Page][0]] + Chord_Type[Chord_Value[1 + Page][1]]);
-            Button_c2.onClick = [this] { setNoteNumber(36); };
+            Button_c2.addListener(this);
 
             addAndMakeVisible(Button_c3);
             Button_c3.setButtonText(Chord_Name[Chord_Value[2 + Page][0]] + Chord_Type[Chord_Value[2 + Page][1]]);
-            Button_c3.onClick = [this] { setNoteNumber(36); };
+            Button_c3.addListener(this);
 
             addAndMakeVisible(Button_c4);
             Button_c4.setButtonText(Chord_Name[Chord_Value[3 + Page][0]] + Chord_Type[Chord_Value[3 + Page][1]]);
-            Button_c4.onClick = [this] { setNoteNumber(36); };
+            Button_c4.addListener(this);
 
             addAndMakeVisible(Button_r1);
             Button_r1.setButtonText("Normal");
@@ -611,6 +613,7 @@ private:
 
             //楽譜部分
             auto scoreArea = r.removeFromTop(160);
+            midiKeyboard.setBounds(scoreArea.removeFromLeft(scoreArea.getWidth()));
 
 
             //¶‰E‚Ìƒ{ƒ^ƒ“
@@ -698,6 +701,15 @@ private:
             return -1;
         }
 
+
+        void buttonClicked(Button* clickedButton) override
+        {
+
+            if (clickedButton == &Button_c1) {
+            }
+
+        }
+
         void updateTrackProperties()
         {
             auto trackColour = getProcessor().getTrackProperties().colour;
@@ -710,7 +722,9 @@ private:
 
 
 
+
     private:
+
 
 
         //--------------------
@@ -748,28 +762,16 @@ private:
 
 
 
-        void buttonClicked(Button* clickedButton) {
 
 
 
-
-
-        }
-
-
-
-
-
-
-
-
-        MidiKeyboardComponent midiKeyboard;
 
         Label timecodeDisplayLabel, tempoDisplayLabel,
               gainLabel  { {}, "Throughput level:" },
               delayLabel { {}, "Delay:" };
 
         //Žg—p‚·‚éƒRƒ“ƒ|[ƒlƒ“ƒg‚ÌéŒ¾
+        MidiKeyboardComponent midiKeyboard;
         Label TempoLabel;
         Slider gainSlider, delaySlider;
         TextButton Button_c1;
