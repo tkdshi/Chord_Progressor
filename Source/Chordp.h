@@ -365,7 +365,26 @@ private:
     public:
 
         int Chord_Value[8][2] = { {0,3},{7,0},{9,1},{4,1},{3,0},{0,0},{4,1},{7,0} };
-        int Page = 1 * 4;
+        int Chord_g1[16][8][2] = { { {5,0},{7,0},{9,0},{9,0},{5,0},{7,0},{9,0},{9,0}},
+        {{0,0},{9,1},{5,0},{7,0},{0,0},{9,1},{5,0},{7,0}},
+        {{0,3},{7,0},{9,1},{4,1},{3,0},{0,0},{4,1},{7,0}},
+        {{0,3},{7,0},{9,1},{4,1},{3,0},{0,0},{4,1},{7,0}},
+        {{0,3},{7,0},{9,1},{4,1},{3,0},{0,0},{4,1},{7,0}},
+        {{0,3},{7,0},{9,1},{4,1},{3,0},{0,0},{4,1},{7,0}},
+        {{0,3},{7,0},{9,1},{4,1},{3,0},{0,0},{4,1},{7,0}},
+        {{0,3},{7,0},{9,1},{4,1},{3,0},{0,0},{4,1},{7,0}}, 
+        {{5,0},{7,0},{9,0},{9,0},{5,0},{7,0},{9,0},{9,0}},
+        {{0,0},{9,1},{5,0},{7,0},{0,0},{9,1},{5,0},{7,0}},
+        {{0,3},{7,0},{9,1},{4,1},{3,0},{0,0},{4,1},{7,0}},
+        {{0,3},{7,0},{9,1},{4,1},{3,0},{0,0},{4,1},{7,0}},
+        {{0,3},{7,0},{9,1},{4,1},{3,0},{0,0},{4,1},{7,0}},
+        {{0,3},{7,0},{9,1},{4,1},{3,0},{0,0},{4,1},{7,0}},
+        {{0,3},{7,0},{9,1},{4,1},{3,0},{0,0},{4,1},{7,0}},
+        {{0,3},{7,0},{9,1},{4,1},{3,0},{0,0},{4,1},{7,0}}, };
+
+        int g_push[8] = { 0,0,0,0,0,0,0,0 };
+
+        int Page = 0;
         const String Chord_Name[12] = { "C","C#","D" ,"D#" ,"E" ,"F" ,"F#" ,"G" ,"G#" ,"A" ,"A#" ,"B" };
         const String Chord_Type[4] = { "","m","M7","m7" };
 
@@ -412,33 +431,43 @@ private:
 
             addAndMakeVisible(Button_g1);
             Button_g1.setButtonText("J-POP");
+            Button_g1.addListener(this);
 
             addAndMakeVisible(Button_g2);
             Button_g2.setButtonText("Rock");
+            Button_g2.addListener(this);
 
             addAndMakeVisible(Button_g3);
             Button_g3.setButtonText("Jazz");
+            Button_g3.addListener(this);
 
             addAndMakeVisible(Button_g4);
             Button_g4.setButtonText("EDM");
+            Button_g4.addListener(this);
 
             addAndMakeVisible(Button_g5);
             Button_g5.setButtonText("Idol");
+            Button_g5.addListener(this);
 
             addAndMakeVisible(Button_g6);
             Button_g6.setButtonText("Ballade");
+            Button_g6.addListener(this);
 
             addAndMakeVisible(Button_g7);
             Button_g7.setButtonText("Anime");
+            Button_g7.addListener(this);
 
             addAndMakeVisible(Button_g8);
             Button_g8.setButtonText("Game");
+            Button_g8.addListener(this);
 
             addAndMakeVisible(Button_L);
             Button_L.setButtonText("<");
+            Button_L.addListener(this);
 
             addAndMakeVisible(Button_R);
             Button_R.setButtonText(">");
+            Button_R.addListener(this);
 
             addAndMakeVisible(tempoDisplayLabel);
             TempoLabel.setFont(Font(Font::getDefaultMonospacedFontName(), 15.0f, Font::plain));
@@ -597,12 +626,65 @@ private:
             return -1;
         }
 
-
+        //ボタンをクリックしたときの処理
         void buttonClicked(Button* clickedButton) override
         {
-
-            if (clickedButton == &Button_c1) {
+            int number;
+                
+            number = 0;
+            if (clickedButton == &Button_g1) {
+                g_push[number] = updateChordValue(number, g_push[number]);
             }
+
+            number++;
+            if (clickedButton == &Button_g2) {
+                g_push[number] = updateChordValue(number, g_push[number]);
+            }
+
+            number++;
+            if (clickedButton == &Button_g3) {
+                g_push[number] = updateChordValue(number, g_push[number]);
+            }
+
+            number++;
+            if (clickedButton == &Button_g4) {
+                g_push[number] = updateChordValue(number, g_push[number]);
+            }
+
+            number++;
+            if (clickedButton == &Button_g5) {
+                g_push[number] = updateChordValue(number, g_push[number]);
+            }
+
+            number++;
+            if (clickedButton == &Button_g6) {
+                g_push[number] = updateChordValue(number, g_push[number]);
+            }
+
+            number++;
+            if (clickedButton == &Button_g7) {
+                g_push[number] = updateChordValue(number, g_push[number]);
+            }
+
+            number++;
+            if (clickedButton == &Button_g8) {
+                g_push[number] = updateChordValue(number, g_push[number]);
+            }
+
+            if (clickedButton == &Button_L && Page != 0) {
+                Page = 0;
+                updateChordLabel();
+            }
+
+            if (clickedButton == &Button_R && Page == 0) {
+                Page = 4;
+                updateChordLabel();
+            }
+
+
+
+                
+            
 
         }
 
@@ -614,6 +696,41 @@ private:
             backgroundColour = (trackColour == Colour() ? lf.findColour (ResizableWindow::backgroundColourId)
                                                         : trackColour.withAlpha (1.0f).withBrightness (0.266f));
             repaint();
+        }
+
+        //コードの値の更新
+        int updateChordValue(int n,int push) {
+            if (push == 0) {
+                push++;
+                n = 2 * n;
+            }
+            else {
+                push--;
+                n = 2 * n + 1;
+
+            }
+
+            for (int i = 0; i < 8; i++) {
+                for (int j = 0; j < 2; j++) {
+                    Chord_Value[i][j] = Chord_g1[n][i][j];
+                }
+
+            }
+
+            updateChordLabel();
+
+            return push;
+        }
+
+
+        //コードのボタン上のラベルを更新
+        void updateChordLabel() {
+            Button_c1.setButtonText(Chord_Name[Chord_Value[0 + Page][0]] + Chord_Type[Chord_Value[0 + Page][1]]);
+            Button_c2.setButtonText(Chord_Name[Chord_Value[1 + Page][0]] + Chord_Type[Chord_Value[1 + Page][1]]);
+            Button_c3.setButtonText(Chord_Name[Chord_Value[2 + Page][0]] + Chord_Type[Chord_Value[2 + Page][1]]);
+            Button_c4.setButtonText(Chord_Name[Chord_Value[3 + Page][0]] + Chord_Type[Chord_Value[3 + Page][1]]);
+        
+        
         }
 
 
