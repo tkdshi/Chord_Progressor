@@ -192,7 +192,19 @@ public:
 			case 3://m7
 				Chord_key[1] = 3;
 				Chord_key[3] = 10;
+			case 4://7
+				Chord_key[3] = 10;
 				break;
+			case 5://m♭5
+				Chord_key[1] = 3;
+				Chord_key[2] = 6;
+				break;
+			case 6://m7♭5
+				Chord_key[1] = 3;
+				Chord_key[2] = 6;
+				Chord_key[3] = 10;
+
+
 			default:
 				break;
 
@@ -431,49 +443,49 @@ private:
 		private Button::Listener
 	{
 	public:
-	/*
-	jpop
-	rock
-	jazz
-	edm
-	idol
-	barade
-	anime
-	game
-	*/
+		/*
+		jpop
+		rock
+		jazz
+		edm
+		idol
+		barade
+		anime
+		game
+		*/
 
 		int Chord_g1[16][8][2] = { {{0,0},{7,0},{9,0},{4,1},{0,0},{7,0},{9,0},{7,0}},
 		{{5,0},{7,0},{9,1},{9,1},{5,0},{7,0},{9,1},{9,1} },
 		{ {0,0},{9,1},{5,0},{7,0},{0,0},{9,1},{5,0},{7,0} },
 		{ {9,1},{5,0},{0,0},{5,0},{9,1},{5,0},{0,0},{5,0} },
-		{ {5,2},{11,0},{9,1},{4,1},{3,0},{0,0},{4,1},{7,0} },
-		{ {0,3},{7,0},{9,1},{4,1},{3,0},{0,0},{4,1},{7,0} },
+		{ {5,4},{11,6},{4,2},{9,3},{2,1},{7,0},{0,0},{0,0} },
+		{ {5,0},{5,0},{0,0},{0,0},{5,0},{5,0},{0,0},{0,0} },
 		{ {5,0},{0,0},{9,1},{7,0},{5,0},{0,0},{9,1},{7,0} },
 		{ {9,0},{11,0},{5,0},{11,0},{9,0},{11,0},{5,0},{11,0}},
 		{ {0,0},{9,1},{5,0},{7,0},{0,0},{9,1},{5,0},{7,0} },
 		{ {9,1},{2,1},{7,0},{9,1},{9,1},{2,1},{7,0},{9,1} },
-		{ {0,3},{7,0},{9,1},{4,1},{3,0},{0,0},{4,1},{7,0} },
-		{ {0,3},{7,0},{9,1},{4,1},{3,0},{0,0},{4,1},{7,0} },
-		{ {0,3},{7,0},{9,1},{4,1},{3,0},{0,0},{4,1},{7,0} },
-		{ {0,3},{7,0},{9,1},{4,1},{3,0},{0,0},{4,1},{7,0} },
-		{ {0,3},{7,0},{9,1},{4,1},{3,0},{0,0},{4,1},{7,0} },
-		{ {0,3},{7,0},{9,1},{4,1},{3,0},{0,0},{4,1},{7,0} } };
+		{ {0,0},{7,0},{9,1},{7,0},{0,0},{7,0},{9,1},{7,0} },
+		{ {9,1},{7,0},{0,0},{5,0},{9,0},{7,0},{0,0},{5,0} },
+		{ {0,0},{5,0},{7,0},{0,0},{0,0},{5,0},{7,0},{0,0} },
+		{ {5,0},{7,0},{4,1},{9,1},{5,0},{7,0},{4,1},{9,1}},
+		{ {0,0},{5,0},{0,0},{7,0},{0,0},{5,0},{0,0},{7,0} },
+		{ {9,1},{5,0},{7,0},{4,0},{9,1},{5,0},{7,0},{4,0} } };
 
 		int g_push[8] = { 0,0,0,0,0,0,0,0 };
 		int r_Name[8] = { 0,0,0,0,0,0,0,0 };
-		
+
 		const String r_type[3] = { "Normal","pop","wave" };
 
 		int Page = 0;
 		const String Chord_Name[12] = { "C","C#","D" ,"D#" ,"E" ,"F" ,"F#" ,"G" ,"G#" ,"A" ,"A#" ,"B" };
-		const String Chord_Type[4] = { "","m","M7","m7" };
+		const String Chord_Type[7] = { "","m","M7","m7","7","m(-5)","m7(-5)" };
 
 		//カラーコードでボタンの色指定
-		const Colour backg_1  = juce::Colour::fromRGB((uint8)119, (uint8)149, (uint8)198);//こいあお
-		const Colour backg_2  = juce::Colour::fromRGB((uint8)186, (uint8)204, (uint8)234);//うすいあお
-		const Colour backg_3  = juce::Colour::fromRGB((uint8)149, (uint8)202, (uint8)170);//こいみどり
-		const Colour backg_4  = juce::Colour::fromRGB((uint8)207, (uint8)227, (uint8)210);//うすいみどり
-		const Colour backg_5  = juce::Colour::fromRGB((uint8)204, (uint8)204, (uint8)204);//うすいみどり
+		const Colour backg_1 = juce::Colour::fromRGB((uint8)119, (uint8)149, (uint8)198);//こいあお
+		const Colour backg_2 = juce::Colour::fromRGB((uint8)186, (uint8)204, (uint8)234);//うすいあお
+		const Colour backg_3 = juce::Colour::fromRGB((uint8)149, (uint8)202, (uint8)170);//こいみどり
+		const Colour backg_4 = juce::Colour::fromRGB((uint8)207, (uint8)227, (uint8)210);//うすいみどり
+		const Colour backg_5 = juce::Colour::fromRGB((uint8)204, (uint8)204, (uint8)204);//うすいみどり
 
 		JuceDemoPluginAudioProcessorEditor(JuceDemoPluginAudioProcessor& owner)
 			: AudioProcessorEditor(owner),
@@ -535,7 +547,7 @@ private:
 			Button_r3.addListener(this);
 
 			addAndMakeVisible(Button_r4);
-			Button_r4.setButtonText("Normal");			
+			Button_r4.setButtonText("Normal");
 			Button_r4.setColour(juce::TextButton::buttonColourId, backg_4);
 			Button_r4.setColour(juce::TextButton::textColourOffId, juce::Colours::black);
 			Button_r4.setColour(juce::TextButton::textColourOnId, juce::Colours::black);
@@ -606,7 +618,7 @@ private:
 			Button_R.setButtonText(">");
 			Button_R.addListener(this);
 
-			AudioParameterInt*  _keyPtr;
+			AudioParameterInt* _keyPtr;
 			addAndMakeVisible(Button_key);
 			Button_key.addListener(this);
 
