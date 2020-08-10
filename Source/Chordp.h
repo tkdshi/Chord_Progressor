@@ -151,12 +151,43 @@ public:
 	int beat_position[4] = { 5,5,17,17 };
 	int Chord_key[5] = { 0,0,0,0,0 };
 
+
+	void ChordKeyCheck(int key[5], int v) {
+		switch (v) {
+		case 0://major
+			break;
+		case 1://miner
+			key[1] = 3;
+			break;
+		case 2://M7
+			key[3] = 11;
+			break;
+		case 3://m7
+			key[1] = 3;
+			key[3] = 10;
+		case 4://7
+			key[3] = 10;
+			break;
+		case 5://m♭5
+			key[1] = 3;
+			key[2] = 6;
+			break;
+		case 6://m7♭5
+			key[1] = 3;
+			key[2] = 6;
+			key[3] = 10;
+
+
+		default:
+			break;
+
+		}
+	}
+
+
 	//アプリケーションからオーディオバッファとMIDIバッファの参照を取得してオーディオレンダリングを実行
 	void processBlock(AudioBuffer<float>& buffer, MidiBuffer& midiMessages) override
 	{
-
-
-
 
 		if (isChanging) {
 			return;
@@ -172,64 +203,93 @@ public:
 		//midiメッセージを追加
 
 			//ノートオン
-		if (beat_position[0] != beat_position[1]) {
-			/*
-			for (int i = 0; Chord_key[i] != -1; i++) {
-				message[i] = juce::MidiMessage::noteOff(1, key_num + Chord_Value[beat_position[1]][0] + Chord_key[i]noteNumber);
-				midiMessages.addEvent(message[i], 0);
-			}*/
+		if ((Pattern_Value[beat_position[0]] == 0) && (beat_position[0] != beat_position[1])) {
+
 			int Chord_key[5] = { 0,4,7,-1,-1 };
+			ChordKeyCheck(Chord_key, Chord_Value[beat_position[0]][1]);
 
 			keyboardState.reset();
-			switch (Chord_Value[beat_position[0]][1]) {
-			case 0://major
-				break;
-			case 1://miner
-				Chord_key[1] = 3;
-				break;
-			case 2://M7
-				Chord_key[3] = 11;
-				break;
-			case 3://m7
-				Chord_key[1] = 3;
-				Chord_key[3] = 10;
-			case 4://7
-				Chord_key[3] = 10;
-				break;
-			case 5://m♭5
-				Chord_key[1] = 3;
-				Chord_key[2] = 6;
-				break;
-			case 6://m7♭5
-				Chord_key[1] = 3;
-				Chord_key[2] = 6;
-				Chord_key[3] = 10;
-
-
-			default:
-				break;
-
-			}
-
-
-
-
 			for (int i = 0; Chord_key[i] != -1; i++) {
 				message[i] = juce::MidiMessage::noteOn(1, key_num + Chord_Value[beat_position[0]][0] + Chord_key[i]/*noteNumber*/, (uint8)127);
 				midiMessages.addEvent(message[i], 0/*sample number*/);
+
 			}
-		}
-		else {
-			juce::MidiMessage::allNotesOff(1);
+
 
 		}
-		//ノートオフ
-		/*
-		auto messageOff = juce::MidiMessage::noteOff(message.getChannel(), message.getNoteNumber());
-		addMessageToBuffer(messageOff);
-		*/
 
+		if (Pattern_Value[beat_position[0]] == 1) {
+			int Chord_key[5] = { 0,4,7,-1,-1 };
+			ChordKeyCheck(Chord_key, Chord_Value[beat_position[0]][1]);
+			int KEY = Chord_key[3] == -1 ? 2 : 3;
 
+			if ((beat_position[2] != beat_position[3])) {
+				if (beat_position[2] % 4 == 0) {
+					keyboardState.reset();
+
+					message[0] = juce::MidiMessage::noteOn(1, key_num + Chord_Value[beat_position[0]][0] + Chord_key[KEY]/*noteNumber*/, (uint8)127);
+					midiMessages.addEvent(message[0], 0/*sample number*/);
+					message[1] = juce::MidiMessage::noteOn(1, key_num + Chord_Value[beat_position[0]][0] + Chord_key[1] /*noteNumber*/, (uint8)127);
+					midiMessages.addEvent(message[1], 0/*sample number*/);
+
+				}
+				if (beat_position[2] % 4 == 2) {
+					keyboardState.reset();
+					message[0] = juce::MidiMessage::noteOn(1, key_num + Chord_Value[beat_position[0]][0] + Chord_key[0]/*noteNumber*/, (uint8)127);
+					midiMessages.addEvent(message[0], 0/*sample number*/);
+
+				}
+
+			}
+
+		}
+
+		if (Pattern_Value[beat_position[0]] == 2) {
+			int Chord_key[5] = { 0,4,7,-1,-1 };
+			ChordKeyCheck(Chord_key, Chord_Value[beat_position[0]][1]);
+			int KEY = Chord_key[3] == -1 ? 2 : 3;
+
+			if ((beat_position[2] != beat_position[3])) {
+				if (beat_position[2] % 8 == 0) {
+					keyboardState.reset();
+					message[0] = juce::MidiMessage::noteOn(1, key_num + Chord_Value[beat_position[0]][0] + Chord_key[0]/*noteNumber*/, (uint8)127);
+					midiMessages.addEvent(message[0], 0/*sample number*/);
+
+				}
+				if (beat_position[2] % 8 == 7) {
+					keyboardState.reset();
+					message[0] = juce::MidiMessage::noteOn(1, key_num + Chord_Value[beat_position[0]][0] + Chord_key[1]/*noteNumber*/, (uint8)127);
+					midiMessages.addEvent(message[0], 0/*sample number*/);
+
+				}
+				if (beat_position[2] % 8 == 1 || beat_position[2] % 8 == 6) {
+					keyboardState.reset();
+					message[0] = juce::MidiMessage::noteOn(1, key_num + Chord_Value[beat_position[0]][0] + Chord_key[KEY] /*noteNumber*/, (uint8)127);
+					midiMessages.addEvent(message[0], 0/*sample number*/);
+
+				}
+				if (beat_position[2] % 8 == 2 || beat_position[2] % 8 == 5) {
+					keyboardState.reset();
+					message[0] = juce::MidiMessage::noteOn(1, key_num + Chord_Value[beat_position[0]][0] + Chord_key[0] + 12/*noteNumber*/, (uint8)127);
+					midiMessages.addEvent(message[0], 0/*sample number*/);
+
+				}
+				if (beat_position[2] % 8 == 3) {
+					keyboardState.reset();
+					message[0] = juce::MidiMessage::noteOn(1, key_num + Chord_Value[beat_position[0]][0] + Chord_key[1] + 12/*noteNumber*/, (uint8)127);
+					midiMessages.addEvent(message[0], 0/*sample number*/);
+
+				}
+				if (beat_position[2] % 8 == 4) {
+					keyboardState.reset();
+					message[0] = juce::MidiMessage::noteOn(1, key_num + Chord_Value[beat_position[0]][0] + Chord_key[KEY] + 12/*noteNumber*/, (uint8)127);
+					midiMessages.addEvent(message[0], 0/*sample number*/);
+
+				}
+			}
+			
+		
+		}
 
 
 
@@ -459,8 +519,8 @@ private:
 		{{5,0},{7,0},{9,1},{9,1},{5,0},{7,0},{9,1},{9,1} },
 		{ {0,0},{9,1},{5,0},{7,0},{0,0},{9,1},{5,0},{7,0} },
 		{ {9,1},{5,0},{0,0},{5,0},{9,1},{5,0},{0,0},{5,0} },
-		{ {5,4},{11,6},{4,2},{9,3},{2,1},{7,0},{0,0},{0,0} },
-		{ {5,0},{5,0},{0,0},{0,0},{5,0},{5,0},{0,0},{0,0} },
+		{ {5,4},{11,6},{4,2},{9,3},{5,4},{11,6},{4,2},{9,3} },
+		{ {5,0},{0,0},{5,0},{0,0},{5,0},{0,0},{5,0},{0,0} },
 		{ {5,0},{0,0},{9,1},{7,0},{5,0},{0,0},{9,1},{7,0} },
 		{ {9,0},{11,0},{5,0},{11,0},{9,0},{11,0},{5,0},{11,0}},
 		{ {0,0},{9,1},{5,0},{7,0},{0,0},{9,1},{5,0},{7,0} },
@@ -473,9 +533,8 @@ private:
 		{ {9,1},{5,0},{7,0},{4,0},{9,1},{5,0},{7,0},{4,0} } };
 
 		int g_push[8] = { 0,0,0,0,0,0,0,0 };
-		int r_Name[8] = { 0,0,0,0,0,0,0,0 };
 
-		const String r_type[3] = { "Normal","pop","wave" };
+		const String Pattern_Name[3] = { "Normal","pop","wave" };
 
 		int Page = 0;
 		const String Chord_Name[12] = { "C","C#","D" ,"D#" ,"E" ,"F" ,"F#" ,"G" ,"G#" ,"A" ,"A#" ,"B" };
@@ -829,7 +888,7 @@ private:
 			if (clickedButton == &Button_r1) {
 				updatePattern(number, Pattern_Value[number]);
 			}
-			
+
 			number++;
 			if (clickedButton == &Button_r2) {
 				updatePattern(number, Pattern_Value[number]);
@@ -856,7 +915,7 @@ private:
 				updateChordLabel();
 				updatePatternLabel();
 			}
-			
+
 
 
 
@@ -921,15 +980,15 @@ private:
 		}
 		void updatePatternLabel() {
 
-				Button_r1.setButtonText(Pattern_Name[Pattern_Value[0 + Page]]);
+			Button_r1.setButtonText(Pattern_Name[Pattern_Value[0 + Page]]);
 
-				Button_r2.setButtonText(Pattern_Name[Pattern_Value[1 + Page]]);
+			Button_r2.setButtonText(Pattern_Name[Pattern_Value[1 + Page]]);
 
-				Button_r3.setButtonText(Pattern_Name[Pattern_Value[2 + Page]]);
+			Button_r3.setButtonText(Pattern_Name[Pattern_Value[2 + Page]]);
 
-				Button_r4.setButtonText(Pattern_Name[Pattern_Value[3 + Page]]);
+			Button_r4.setButtonText(Pattern_Name[Pattern_Value[3 + Page]]);
 
-			
+
 		}
 
 
@@ -1004,7 +1063,7 @@ private:
 			auto quarterNotesPerBar = (numerator * 4 / denominator);
 			auto beats = (fmod(quarterNotes, quarterNotesPerBar) / quarterNotesPerBar) * numerator;
 
-			auto bar = ((int)quarterNotes) / quarterNotesPerBar + 1;
+			auto bar = ((((int)quarterNotes) / quarterNotesPerBar)% 8) + 1;
 			auto beat = ((int)beats) + 1;
 			auto ticks = ((int)(fmod(beats, 1.0) * 960.0 + 0.5));
 
@@ -1025,9 +1084,9 @@ private:
 			displayText2 << " Tempo: " << String(pos.bpm, 2);
 
 			if (pos.isRecording)
-				displayText << "  (recording)";
+				displayText << "  (record)";
 			else if (pos.isPlaying)
-				displayText << "  (playing)";
+				displayText << "  (play)";
 
 			timecodeDisplayLabel.setText(displayText.toString(), dontSendNotification);
 			tempoDisplayLabel.setText(displayText2.toString(), dontSendNotification);
@@ -1110,6 +1169,8 @@ private:
 
 				auto quarterNotesPerBar = (newTime.timeSigNumerator * 4 / newTime.timeSigDenominator);
 				auto beats = (fmod(newTime.ppqPosition, quarterNotesPerBar) / quarterNotesPerBar) * newTime.timeSigNumerator;
+				
+				beats *= 4;
 
 				int bar = (((((int)newTime.ppqPosition) / quarterNotesPerBar)) % 8); //0から7
 				int beat = ((((int)beats)) % 16); //0から16
