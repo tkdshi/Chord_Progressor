@@ -53,6 +53,7 @@
 #pragma once
 
 int Chord_Value[8][2] = { {5,0},{7,0},{9,1},{9,1},{5,0},{7,0},{9,1},{9,1} };
+int Pattern_Value[8] = { 0,0,0,0,0,0,0,0 };
 
 
 //==============================================================================
@@ -485,7 +486,7 @@ private:
 		const Colour backg_2 = juce::Colour::fromRGB((uint8)186, (uint8)204, (uint8)234);//うすいあお
 		const Colour backg_3 = juce::Colour::fromRGB((uint8)149, (uint8)202, (uint8)170);//こいみどり
 		const Colour backg_4 = juce::Colour::fromRGB((uint8)207, (uint8)227, (uint8)210);//うすいみどり
-		const Colour backg_5 = juce::Colour::fromRGB((uint8)204, (uint8)204, (uint8)204);//うすいみどり
+		const Colour backg_5 = juce::Colour::fromRGB((uint8)204, (uint8)204, (uint8)204);//はいいろ
 
 		JuceDemoPluginAudioProcessorEditor(JuceDemoPluginAudioProcessor& owner)
 			: AudioProcessorEditor(owner),
@@ -824,17 +825,38 @@ private:
 				g_push[number] = updateChordValue(number, g_push[number]);
 			}
 
+			number = Page;
+			if (clickedButton == &Button_r1) {
+				updatePattern(number, Pattern_Value[number]);
+			}
+			
+			number++;
+			if (clickedButton == &Button_r2) {
+				updatePattern(number, Pattern_Value[number]);
+			}
+
+			number++;
+			if (clickedButton == &Button_r3) {
+				updatePattern(number, Pattern_Value[number]);
+			}
+
+			number++;
+			if (clickedButton == &Button_r4) {
+				updatePattern(number, Pattern_Value[number]);
+			}
+
 			if (clickedButton == &Button_L && Page != 0) {
 				Page = 0;
 				updateChordLabel();
+				updatePatternLabel();
 			}
 
 			if (clickedButton == &Button_R && Page == 0) {
 				Page = 4;
 				updateChordLabel();
+				updatePatternLabel();
 			}
-
-
+			
 
 
 
@@ -876,6 +898,17 @@ private:
 			return push;
 		}
 
+		//コードの値の更新
+		void updatePattern(int n, int push) {
+
+
+
+			Pattern_Value[n] = (push + 1) % 3;
+
+			updatePatternLabel();
+
+
+		}
 
 		//コードのボタン上のラベルを更新
 		void updateChordLabel() {
@@ -886,50 +919,26 @@ private:
 
 
 		}
+		void updatePatternLabel() {
 
+				Button_r1.setButtonText(Pattern_Name[Pattern_Value[0 + Page]]);
+
+				Button_r2.setButtonText(Pattern_Name[Pattern_Value[1 + Page]]);
+
+				Button_r3.setButtonText(Pattern_Name[Pattern_Value[2 + Page]]);
+
+				Button_r4.setButtonText(Pattern_Name[Pattern_Value[3 + Page]]);
+
+			
+		}
 
 
 
 	private:
 
+		Label timecodeDisplayLabel, tempoDisplayLabel;
 
-
-		//--------------------
-		//midiŠÖ˜A‚ÌƒRƒ“ƒ|[ƒlƒ“ƒg
-		static juce::String getMidiMessageDescription(const juce::MidiMessage& m)
-		{
-			if (m.isNoteOn())           return "Note on " + juce::MidiMessage::getMidiNoteName(m.getNoteNumber(), true, true, 3);
-			if (m.isNoteOff())          return "Note off " + juce::MidiMessage::getMidiNoteName(m.getNoteNumber(), true, true, 3);
-			if (m.isProgramChange())    return "Program change " + juce::String(m.getProgramChangeNumber());
-			if (m.isPitchWheel())       return "Pitch wheel " + juce::String(m.getPitchWheelValue());
-			if (m.isAftertouch())       return "After touch " + juce::MidiMessage::getMidiNoteName(m.getNoteNumber(), true, true, 3) + ": " + juce::String(m.getAfterTouchValue());
-			if (m.isChannelPressure())  return "Channel pressure " + juce::String(m.getChannelPressureValue());
-			if (m.isAllNotesOff())      return "All notes off";
-			if (m.isAllSoundOff())      return "All sound off";
-			if (m.isMetaEvent())        return "Meta event";
-
-			if (m.isController())
-			{
-				juce::String name(juce::MidiMessage::getControllerName(m.getControllerNumber()));
-
-				if (name.isEmpty())
-					name = "[" + juce::String(m.getControllerNumber()) + "]";
-
-				return "Controller " + name + ": " + juce::String(m.getControllerValue());
-			}
-
-			return juce::String::toHexString(m.getRawData(), m.getRawDataSize());
-		}
-
-
-
-
-
-		Label timecodeDisplayLabel, tempoDisplayLabel,
-			gainLabel{ {}, "Throughput level:" },
-			delayLabel{ {}, "Delay:" };
-
-		//Žg—p‚·‚éƒRƒ“ƒ|[ƒlƒ“ƒg‚ÌéŒ¾
+		//使用コンポーネントの宣言
 		MidiKeyboardComponent midiKeyboard;
 		Label TempoLabel;
 		Slider gainSlider, delaySlider;
