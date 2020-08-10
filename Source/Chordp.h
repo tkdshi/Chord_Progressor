@@ -501,7 +501,8 @@ private:
 	class JuceDemoPluginAudioProcessorEditor : public AudioProcessorEditor,
 		private Timer,
 		private Value::Listener,
-		private Button::Listener
+		private Button::Listener,
+		private Slider::Listener
 	{
 	public:
 		/*
@@ -532,9 +533,14 @@ private:
 		{ {0,0},{5,0},{0,0},{7,0},{0,0},{5,0},{0,0},{7,0} },
 		{ {9,1},{5,0},{7,0},{4,0},{9,1},{5,0},{7,0},{4,0} } };
 
-		int g_push[8] = { 0,0,0,0,0,0,0,0 };
 
-		const String Pattern_Name[3] = { "Normal","pop","wave" };
+	
+		
+		
+		int g_push[8] = { 0,0,0,0,0,0,0,0 }
+		;
+
+		const String Pattern_Name[4] = { "Normal","pop","wave","stylish" };
 
 		int Page = 0;
 		const String Chord_Name[12] = { "C","C#","D" ,"D#" ,"E" ,"F" ,"F#" ,"G" ,"G#" ,"A" ,"A#" ,"B" };
@@ -678,22 +684,42 @@ private:
 			Button_R.setButtonText(">");
 			Button_R.addListener(this);
 
-			AudioParameterInt* _keyPtr;
+			/*
 			addAndMakeVisible(Button_key);
 			Button_key.addListener(this);
+
+			addAndMakeVisible(Button_tone);
+			Button_tone.addListener(this);
+			*/
+
+			
+			// add some sliders..
+			addAndMakeVisible(Button_key);
+			Button_key.setSliderStyle(Slider::IncDecButtons);
+			Button_key.setTextBoxStyle(Slider::TextBoxRight,false,80,40);
+			Button_key.setRange(-12, 12);
+			Button_key.setValue(0);
+			Button_key.addListener(this);
+
+			
+
+			addAndMakeVisible(Button_tone);
+			Button_tone.setSliderStyle(Slider::IncDecButtons);
+			Button_tone.setTextBoxStyle(Slider::TextBoxRight, false, 80, 40);
+			Button_tone.setRange(1, 8);
+			Button_tone.setValue(1);
+			Button_tone.addListener(this);
+		
+
 
 			addAndMakeVisible(tempoDisplayLabel);
 			TempoLabel.setFont(Font(Font::getDefaultMonospacedFontName(), 15.0f, Font::plain));
 
-			// add some sliders..
-			addAndMakeVisible(gainSlider);
-			gainSlider.setSliderStyle(Slider::Rotary);
 
-			addAndMakeVisible(delaySlider);
-			delaySlider.setSliderStyle(Slider::Rotary);
 
 			// add the midi keyboard component..
 			addAndMakeVisible(midiKeyboard);
+			midiKeyboard.setAvailableRange(24,107);
 
 			// add a label that will display the current timecode and status..
 			addAndMakeVisible(timecodeDisplayLabel);
@@ -731,7 +757,7 @@ private:
 			g.fillAll();
 
 			//Imageオブジェクトの生成
-			image_background = ImageCache::getFromMemory(BinaryData::background_png, BinaryData::background_pngSize);
+			image_background = ImageCache::getFromMemory(BinaryData::bg_jpg, BinaryData::bg_jpgSize);
 
 			//Imageオブジェクトの描画
 			g.drawImageWithin(image_background, 0, 0, image_background.getWidth(), image_background.getHeight(), RectanglePlacement::yTop, false);
@@ -747,20 +773,22 @@ private:
 			auto r = getLocalBounds().reduced(8);
 
 			//ヘッダ部分
-			auto headerArea = r.removeFromTop(80);
+			auto headerArea = r.removeFromTop(75);
 
-			//楽譜部分
-			auto scoreArea = r.removeFromTop(160);
+
+			//鍵盤部分
+			auto scoreArea = r.removeFromTop(170);
 			midiKeyboard.setBounds(scoreArea.removeFromLeft(scoreArea.getWidth()));
 
+			auto marginA = r.removeFromTop(10);
 
 			//左右のボタン
-			auto sideWidth = 25;
+			auto sideWidth = 20;
 			Button_L.setBounds(r.removeFromLeft(sideWidth));
 			Button_R.setBounds(r.removeFromRight(sideWidth));
 
 
-			auto margin1 = r.removeFromTop(30);
+			auto marginB = r.removeFromTop(5);
 
 			//コード部分
 			auto chordArea = r.removeFromTop(70);
@@ -769,21 +797,23 @@ private:
 			Button_c3.setBounds(chordArea.removeFromLeft(chordArea.getWidth() / 2));
 			Button_c4.setBounds(chordArea.removeFromLeft(chordArea.getWidth() / 1));
 
-			auto margin2 = r.removeFromTop(10);
+			auto margin2 = r.removeFromTop(20);
 
 
 			//コードの種類部分
-			auto rythmArea = r.removeFromTop(40);
+			auto rythmArea = r.removeFromTop(30);
 			Button_r1.setBounds(rythmArea.removeFromLeft(rythmArea.getWidth() / 4));
 			Button_r2.setBounds(rythmArea.removeFromLeft(rythmArea.getWidth() / 3));
 			Button_r3.setBounds(rythmArea.removeFromLeft(rythmArea.getWidth() / 2));
 			Button_r4.setBounds(rythmArea.removeFromLeft(rythmArea.getWidth() / 1));
 
 
-			auto margin3 = r.removeFromTop(10);
+			auto margin3 = r.removeFromTop(65);
 
 			//ジャンル部分
 			auto genreArea = r.removeFromLeft(r.getWidth() / 2);
+			auto marginC = genreArea.removeFromLeft(20);
+			auto marginD = genreArea.removeFromRight(50);
 			auto genrerow1 = genreArea.removeFromTop(genreArea.getHeight() / 2);
 			auto genrerow2 = genreArea.removeFromTop(genreArea.getHeight() / 1);
 			Button_g1.setBounds(genrerow1.removeFromLeft(genrerow1.getWidth() / 4));
@@ -798,19 +828,21 @@ private:
 
 			//小節など
 			auto stateArea = r.removeFromLeft(r.getWidth() / 1);
+			auto marginE = genreArea.removeFromLeft(50);
+			auto marginF = genreArea.removeFromRight(20);
 			auto staterow1 = stateArea.removeFromTop(stateArea.getHeight() / 2);
 			auto staterow2 = stateArea.removeFromTop(stateArea.getHeight());
 
-			timecodeDisplayLabel.setBounds(staterow1.removeFromLeft(staterow1.getWidth()));
-			tempoDisplayLabel.setBounds(staterow2.removeFromLeft(staterow2.getWidth()));
+			Button_key.setBounds(staterow1.removeFromLeft(staterow1.getWidth() / 1));
+
+			Button_tone.setBounds(staterow2.removeFromLeft(staterow2.getWidth() / 1));
+			
+			
+			//timecodeDisplayLabel.setBounds(staterow1.removeFromLeft(staterow1.getWidth()));
+			//tempoDisplayLabel.setBounds(staterow2.removeFromLeft(staterow2.getWidth()));
 
 			auto sliderArea = r.removeFromTop(60);
-			//gainSlider.setBounds  (sliderArea.removeFromLeft (jmin (180, sliderArea.getWidth() / 2)));
-			//delaySlider.setBounds (sliderArea.removeFromLeft (jmin (180, sliderArea.getWidth())));
-			//midiKeyboard.setBounds(r.removeFromBottom(70));
 
-
-			//ƒ{ƒgƒ€•”•ª
 
 
 			lastUIWidth = getWidth();
@@ -922,6 +954,17 @@ private:
 
 		}
 
+		void sliderValueChanged(juce::Slider* slider) override
+		{
+			if (slider == &Button_key) {
+			}
+				//durationSlider.setValue(1.0 / frequencySlider.getValue(), juce::dontSendNotification);
+				if (slider == &Button_tone) {
+				}
+				//frequencySlider.setValue(1.0 / durationSlider.getValue(), juce::dontSendNotification);
+		}
+
+
 		void updateTrackProperties()
 		{
 			auto trackColour = getProcessor().getTrackProperties().colour;
@@ -962,7 +1005,7 @@ private:
 
 
 
-			Pattern_Value[n] = (push + 1) % 3;
+			Pattern_Value[n] = (push + 1) % 4;
 
 			updatePatternLabel();
 
@@ -993,6 +1036,7 @@ private:
 
 
 
+
 	private:
 
 		Label timecodeDisplayLabel, tempoDisplayLabel;
@@ -1019,7 +1063,20 @@ private:
 		TextButton Button_g8;
 		TextButton Button_L;
 		TextButton Button_R;
-		ToggleButton Button_key;
+		
+		//TextButton Button_key;
+		//TextButton Button_tone;
+
+
+		
+		Slider Button_key;
+		Slider Button_tone;
+
+		AudioParameterInt* _bkey;
+		AudioParameterInt* _btone;
+
+		
+
 
 		Image image_background;
 

@@ -8,8 +8,8 @@
 
 namespace BinaryData
 {
-    extern const char*   background_png;
-    const int            background_pngSize = 12989;
+    extern const char*   bg_jpg;
+    const int            bg_jpgSize = 19597;
 
     extern const char*   piano_mp3;
     const int            piano_mp3Size = 129148;
