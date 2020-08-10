@@ -431,13 +431,22 @@ private:
 		private Button::Listener
 	{
 	public:
-
+	/*
+	jpop
+	rock
+	jazz
+	edm
+	idol
+	barade
+	anime
+	game
+	*/
 
 		int Chord_g1[16][8][2] = { {{0,0},{7,0},{9,0},{4,1},{0,0},{7,0},{9,0},{7,0}},
-			{{5,0},{7,0},{9,1},{9,1},{5,0},{7,0},{9,1},{9,1} },
+		{{5,0},{7,0},{9,1},{9,1},{5,0},{7,0},{9,1},{9,1} },
 		{ {0,0},{9,1},{5,0},{7,0},{0,0},{9,1},{5,0},{7,0} },
 		{ {9,1},{5,0},{0,0},{5,0},{9,1},{5,0},{0,0},{5,0} },
-		{ {0,3},{7,0},{9,1},{4,1},{3,0},{0,0},{4,1},{7,0} },
+		{ {5,2},{11,0},{9,1},{4,1},{3,0},{0,0},{4,1},{7,0} },
 		{ {0,3},{7,0},{9,1},{4,1},{3,0},{0,0},{4,1},{7,0} },
 		{ {5,0},{0,0},{9,1},{7,0},{5,0},{0,0},{9,1},{7,0} },
 		{ {9,0},{11,0},{5,0},{11,0},{9,0},{11,0},{5,0},{11,0}},
@@ -451,14 +460,20 @@ private:
 		{ {0,3},{7,0},{9,1},{4,1},{3,0},{0,0},{4,1},{7,0} } };
 
 		int g_push[8] = { 0,0,0,0,0,0,0,0 };
-
-
+		int r_Name[8] = { 0,0,0,0,0,0,0,0 };
+		
+		const String r_type[3] = { "Normal","pop","wave" };
 
 		int Page = 0;
 		const String Chord_Name[12] = { "C","C#","D" ,"D#" ,"E" ,"F" ,"F#" ,"G" ,"G#" ,"A" ,"A#" ,"B" };
 		const String Chord_Type[4] = { "","m","M7","m7" };
 
-
+		//カラーコードでボタンの色指定
+		const Colour backg_1  = juce::Colour::fromRGB((uint8)119, (uint8)149, (uint8)198);//こいあお
+		const Colour backg_2  = juce::Colour::fromRGB((uint8)186, (uint8)204, (uint8)234);//うすいあお
+		const Colour backg_3  = juce::Colour::fromRGB((uint8)149, (uint8)202, (uint8)170);//こいみどり
+		const Colour backg_4  = juce::Colour::fromRGB((uint8)207, (uint8)227, (uint8)210);//うすいみどり
+		const Colour backg_5  = juce::Colour::fromRGB((uint8)204, (uint8)204, (uint8)204);//うすいみどり
 
 		JuceDemoPluginAudioProcessorEditor(JuceDemoPluginAudioProcessor& owner)
 			: AudioProcessorEditor(owner),
@@ -470,62 +485,117 @@ private:
 			//Using Button Attach
 			addAndMakeVisible(Button_c1);
 			Button_c1.setButtonText(Chord_Name[Chord_Value[0 + Page][0]] + Chord_Type[Chord_Value[0 + Page][1]]);
+			Button_c1.setColour(juce::TextButton::buttonColourId, backg_4);
+			Button_c1.setColour(juce::TextButton::textColourOffId, juce::Colours::black);
+			Button_c1.setColour(juce::TextButton::textColourOnId, juce::Colours::black);
 			Button_c1.addListener(this);
 
 			addAndMakeVisible(Button_c2);
 			Button_c2.setButtonText(Chord_Name[Chord_Value[1 + Page][0]] + Chord_Type[Chord_Value[1 + Page][1]]);
+			Button_c2.setColour(juce::TextButton::buttonColourId, backg_4);
+			Button_c2.setColour(juce::TextButton::textColourOffId, juce::Colours::black);
+			Button_c2.setColour(juce::TextButton::textColourOnId, juce::Colours::black);
 			Button_c2.addListener(this);
 
 			addAndMakeVisible(Button_c3);
 			Button_c3.setButtonText(Chord_Name[Chord_Value[2 + Page][0]] + Chord_Type[Chord_Value[2 + Page][1]]);
+			Button_c3.setColour(juce::TextButton::buttonColourId, backg_4);
+			Button_c3.setColour(juce::TextButton::textColourOffId, juce::Colours::black);
+			Button_c3.setColour(juce::TextButton::textColourOnId, juce::Colours::black);
 			Button_c3.addListener(this);
 
 			addAndMakeVisible(Button_c4);
 			Button_c4.setButtonText(Chord_Name[Chord_Value[3 + Page][0]] + Chord_Type[Chord_Value[3 + Page][1]]);
+			Button_c4.setColour(juce::TextButton::buttonColourId, backg_4);
+			Button_c4.setColour(juce::TextButton::textColourOffId, juce::Colours::black);
+			Button_c4.setColour(juce::TextButton::textColourOnId, juce::Colours::black);
 			Button_c4.addListener(this);
 
 			addAndMakeVisible(Button_r1);
 			Button_r1.setButtonText("Normal");
+			Button_r1.setColour(juce::TextButton::buttonColourId, backg_4);
+			Button_r1.setColour(juce::TextButton::textColourOffId, juce::Colours::black);
+			Button_r1.setColour(juce::TextButton::textColourOnId, juce::Colours::black);
+			Button_r1.addListener(this);
+
 
 			addAndMakeVisible(Button_r2);
 			Button_r2.setButtonText("Normal");
+			Button_r2.setColour(juce::TextButton::buttonColourId, backg_4);
+			Button_r2.setColour(juce::TextButton::textColourOffId, juce::Colours::black);
+			Button_r2.setColour(juce::TextButton::textColourOnId, juce::Colours::black);
+			Button_r2.addListener(this);
+
 
 			addAndMakeVisible(Button_r3);
 			Button_r3.setButtonText("Normal");
+			Button_r3.setColour(juce::TextButton::buttonColourId, backg_4);
+			Button_r3.setColour(juce::TextButton::textColourOffId, juce::Colours::black);
+			Button_r3.setColour(juce::TextButton::textColourOnId, juce::Colours::black);
+			Button_r3.addListener(this);
 
 			addAndMakeVisible(Button_r4);
-			Button_r4.setButtonText("Normal");
+			Button_r4.setButtonText("Normal");			
+			Button_r4.setColour(juce::TextButton::buttonColourId, backg_4);
+			Button_r4.setColour(juce::TextButton::textColourOffId, juce::Colours::black);
+			Button_r4.setColour(juce::TextButton::textColourOnId, juce::Colours::black);
+			Button_r4.addListener(this);
+
 
 			addAndMakeVisible(Button_g1);
 			Button_g1.setButtonText("J-POP");
+			Button_g1.setColour(juce::TextButton::buttonColourId, backg_5);
+			Button_g1.setColour(juce::TextButton::textColourOffId, juce::Colours::black);
+			Button_g1.setColour(juce::TextButton::textColourOnId, juce::Colours::black);
 			Button_g1.addListener(this);
 
 			addAndMakeVisible(Button_g2);
 			Button_g2.setButtonText("Rock");
+			Button_g2.setColour(juce::TextButton::buttonColourId, backg_5);
+			Button_g2.setColour(juce::TextButton::textColourOffId, juce::Colours::black);
+			Button_g2.setColour(juce::TextButton::textColourOnId, juce::Colours::black);
 			Button_g2.addListener(this);
 
 			addAndMakeVisible(Button_g3);
 			Button_g3.setButtonText("Jazz");
+			Button_g3.setColour(juce::TextButton::buttonColourId, backg_5);
+			Button_g3.setColour(juce::TextButton::textColourOffId, juce::Colours::black);
+			Button_g3.setColour(juce::TextButton::textColourOnId, juce::Colours::black);
 			Button_g3.addListener(this);
 
 			addAndMakeVisible(Button_g4);
 			Button_g4.setButtonText("EDM");
+			Button_g4.setColour(juce::TextButton::buttonColourId, backg_5);
+			Button_g4.setColour(juce::TextButton::textColourOffId, juce::Colours::black);
+			Button_g4.setColour(juce::TextButton::textColourOnId, juce::Colours::black);
 			Button_g4.addListener(this);
 
 			addAndMakeVisible(Button_g5);
 			Button_g5.setButtonText("Idol");
+			Button_g5.setColour(juce::TextButton::buttonColourId, backg_5);
+			Button_g5.setColour(juce::TextButton::textColourOffId, juce::Colours::black);
+			Button_g5.setColour(juce::TextButton::textColourOnId, juce::Colours::black);
 			Button_g5.addListener(this);
 
 			addAndMakeVisible(Button_g6);
 			Button_g6.setButtonText("Ballade");
+			Button_g6.setColour(juce::TextButton::buttonColourId, backg_5);
+			Button_g6.setColour(juce::TextButton::textColourOffId, juce::Colours::black);
+			Button_g6.setColour(juce::TextButton::textColourOnId, juce::Colours::black);
 			Button_g6.addListener(this);
 
 			addAndMakeVisible(Button_g7);
 			Button_g7.setButtonText("Anime");
+			Button_g7.setColour(juce::TextButton::buttonColourId, backg_5);
+			Button_g7.setColour(juce::TextButton::textColourOffId, juce::Colours::black);
+			Button_g7.setColour(juce::TextButton::textColourOnId, juce::Colours::black);
 			Button_g7.addListener(this);
 
 			addAndMakeVisible(Button_g8);
 			Button_g8.setButtonText("Game");
+			Button_g8.setColour(juce::TextButton::buttonColourId, backg_5);
+			Button_g8.setColour(juce::TextButton::textColourOffId, juce::Colours::black);
+			Button_g8.setColour(juce::TextButton::textColourOnId, juce::Colours::black);
 			Button_g8.addListener(this);
 
 			addAndMakeVisible(Button_L);
@@ -535,6 +605,10 @@ private:
 			addAndMakeVisible(Button_R);
 			Button_R.setButtonText(">");
 			Button_R.addListener(this);
+
+			AudioParameterInt*  _keyPtr;
+			addAndMakeVisible(Button_key);
+			Button_key.addListener(this);
 
 			addAndMakeVisible(tempoDisplayLabel);
 			TempoLabel.setFont(Font(Font::getDefaultMonospacedFontName(), 15.0f, Font::plain));
@@ -839,16 +913,6 @@ private:
 
 
 
-
-
-
-
-
-
-
-
-
-
 		Label timecodeDisplayLabel, tempoDisplayLabel,
 			gainLabel{ {}, "Throughput level:" },
 			delayLabel{ {}, "Delay:" };
@@ -875,6 +939,7 @@ private:
 		TextButton Button_g8;
 		TextButton Button_L;
 		TextButton Button_R;
+		ToggleButton Button_key;
 
 		Image image_background;
 
