@@ -54,6 +54,8 @@
 
 int Chord_Value[8][2] = { {5,0},{7,0},{9,1},{9,1},{5,0},{7,0},{9,1},{9,1} };
 int Pattern_Value[8] = { 0,0,0,0,0,0,0,0 };
+int Pitch = 0;
+int Tone = 0;
 
 
 //==============================================================================
@@ -197,7 +199,7 @@ public:
 
 		int totalNumInputChannels = getTotalNumInputChannels();
 		int totalNumOutputChannels = getTotalNumOutputChannels();
-		int key_num = 48;
+		int key_num = 48 + Pitch;
 		MidiMessage message[4];
 
 		//midiメッセージを追加
@@ -291,6 +293,70 @@ public:
 		
 		}
 
+		if (Pattern_Value[beat_position[0]] == 3) {
+			int Chord_key[5] = { 0,4,7,-1,-1 };
+			ChordKeyCheck(Chord_key, Chord_Value[beat_position[0]][1]);
+			int KEY = Chord_key[3] == -1 ? 2 : 3;
+			if ((beat_position[2] != beat_position[3])) {
+				if (beat_position[2] % 16 == 0 || beat_position[2] % 16 == 4 || beat_position[2] % 16 == 7 || beat_position[2] % 16 == 9 || beat_position[2] % 16 == 12 || beat_position[2] % 16 == 14) {
+					keyboardState.reset();
+					for (int i = 0; Chord_key[i] != -1; i++) {
+						message[i] = juce::MidiMessage::noteOn(1, key_num + Chord_Value[beat_position[0]][0] + Chord_key[i]/*noteNumber*/, (uint8)127);
+						midiMessages.addEvent(message[i], 0/*sample number*/);
+
+					}
+					midiMessages.addEvent(message[0], 0/*sample number*/);
+
+				}
+
+
+				if (beat_position[2] % 16 == 2 || beat_position[2] % 16 == 6 || beat_position[2] % 16 == 11 || beat_position[2] % 16 == 13) {
+					keyboardState.reset();
+					message[0] = juce::MidiMessage::noteOn(1, key_num + Chord_Value[beat_position[0]][0] + Chord_key[0] - 12/*noteNumber*/, (uint8)127);
+					midiMessages.addEvent(message[0], 0/*sample number*/);
+
+
+				}
+
+				if (beat_position[2] % 16 == 8) {
+					keyboardState.reset();
+
+				}
+			}
+		}
+
+
+		if (Pattern_Value[beat_position[0]] == 4) {
+			int Chord_key[5] = { 0,4,7,-1,-1 };
+			ChordKeyCheck(Chord_key, Chord_Value[beat_position[0]][1]);
+			int KEY = Chord_key[3] == -1 ? 2 : 3;
+			if ((beat_position[2] != beat_position[3])) {
+				if (beat_position[2] % 8 == 1 || beat_position[2] % 8 == 4 || beat_position[2] % 8 == 7) {
+					keyboardState.reset();
+					for (int i = 0; Chord_key[i] != -1; i++) {
+						message[i] = juce::MidiMessage::noteOn(1, key_num + Chord_Value[beat_position[0]][0] + Chord_key[i]/*noteNumber*/, (uint8)127);
+						midiMessages.addEvent(message[i], 0/*sample number*/);
+
+					}
+					midiMessages.addEvent(message[0], 0/*sample number*/);
+
+				}
+
+
+				if (beat_position[2] % 8 == 0 || beat_position[2] % 8 == 2 || beat_position[2] % 8 == 6) {
+					keyboardState.reset();
+					message[0] = juce::MidiMessage::noteOn(1, key_num + Chord_Value[beat_position[0]][0] + Chord_key[0] - 12/*noteNumber*/, (uint8)127);
+					midiMessages.addEvent(message[0], 0/*sample number*/);
+
+
+				}
+
+				if (beat_position[2] % 8 == 3) {
+					keyboardState.reset();
+
+				}
+			}
+		}
 
 
 
@@ -501,8 +567,7 @@ private:
 	class JuceDemoPluginAudioProcessorEditor : public AudioProcessorEditor,
 		private Timer,
 		private Value::Listener,
-		private Button::Listener,
-		private Slider::Listener
+		private Button::Listener
 	{
 	public:
 		/*
@@ -540,7 +605,7 @@ private:
 		int g_push[8] = { 0,0,0,0,0,0,0,0 }
 		;
 
-		const String Pattern_Name[4] = { "Normal","pop","wave","stylish" };
+		const String Pattern_Name[5] = { "Normal","pop","wave","stylish","Jazz" };
 
 		int Page = 0;
 		const String Chord_Name[12] = { "C","C#","D" ,"D#" ,"E" ,"F" ,"F#" ,"G" ,"G#" ,"A" ,"A#" ,"B" };
@@ -678,42 +743,73 @@ private:
 
 			addAndMakeVisible(Button_L);
 			Button_L.setButtonText("<");
+			Button_L.setColour(juce::TextButton::buttonColourId, backg_5);
+			Button_L.setColour(juce::TextButton::textColourOffId, juce::Colours::black);
+			Button_L.setColour(juce::TextButton::textColourOnId, juce::Colours::black);
 			Button_L.addListener(this);
 
 			addAndMakeVisible(Button_R);
+			Button_R.setColour(juce::TextButton::buttonColourId, backg_5);
+			Button_R.setColour(juce::TextButton::textColourOffId, juce::Colours::black);
+			Button_R.setColour(juce::TextButton::textColourOnId, juce::Colours::black);
 			Button_R.setButtonText(">");
 			Button_R.addListener(this);
 
+			addAndMakeVisible(Button_keyL);
+			Button_keyL.setButtonText("-");
+			Button_keyL.setColour(juce::TextButton::buttonColourId, backg_5);
+			Button_keyL.setColour(juce::TextButton::textColourOffId, juce::Colours::black);
+			Button_keyL.setColour(juce::TextButton::textColourOnId, juce::Colours::black);
+			Button_keyL.addListener(this);
+
+			addAndMakeVisible(Button_keyR);
+			Button_keyR.setButtonText("+");
+			Button_keyR.setColour(juce::TextButton::buttonColourId, backg_5);
+			Button_keyR.setColour(juce::TextButton::textColourOffId, juce::Colours::black);
+			Button_keyR.setColour(juce::TextButton::textColourOnId, juce::Colours::black);
+			Button_keyR.addListener(this);
+
+			addAndMakeVisible(Button_toneL);
+			Button_toneL.setButtonText("<");
+			Button_toneL.setColour(juce::TextButton::buttonColourId, backg_5);
+			Button_toneL.setColour(juce::TextButton::textColourOffId, juce::Colours::black);
+			Button_toneL.setColour(juce::TextButton::textColourOnId, juce::Colours::black);
+			Button_toneL.addListener(this);
+
+			addAndMakeVisible(Button_toneR);
+			Button_toneR.setButtonText(">");
+			Button_toneR.setColour(juce::TextButton::buttonColourId, backg_5);
+			Button_toneR.setColour(juce::TextButton::textColourOffId, juce::Colours::black);
+			Button_toneR.setColour(juce::TextButton::textColourOnId, juce::Colours::black);
+			Button_toneR.addListener(this);
+
+
+
+			toneLabel.setFont(Font(Font::getDefaultMonospacedFontName(), 15.0f, Font::plain));
+			toneLabel.setColour(juce::Label::textColourId, juce::Colours::black);
+			updateToneLavel();
+			addAndMakeVisible(toneLabel);
+
+
+			keyLabel.setFont(Font(Font::getDefaultMonospacedFontName(), 15.0f, Font::plain));
+			keyLabel.setColour(juce::Label::textColourId, juce::Colours::black);
+			updatePitchLavel();
+			addAndMakeVisible(keyLabel);
 			/*
 			addAndMakeVisible(Button_key);
 			Button_key.addListener(this);
 
-			addAndMakeVisible(Button_tone);
+			//addAndMakeVisible(Button_tone);
 			Button_tone.addListener(this);
 			*/
 
 			
-			// add some sliders..
-			addAndMakeVisible(Button_key);
-			Button_key.setSliderStyle(Slider::IncDecButtons);
-			Button_key.setTextBoxStyle(Slider::TextBoxRight,false,80,40);
-			Button_key.setRange(-12, 12);
-			Button_key.setValue(0);
-			Button_key.addListener(this);
-
-			
-
-			addAndMakeVisible(Button_tone);
-			Button_tone.setSliderStyle(Slider::IncDecButtons);
-			Button_tone.setTextBoxStyle(Slider::TextBoxRight, false, 80, 40);
-			Button_tone.setRange(1, 8);
-			Button_tone.setValue(1);
-			Button_tone.addListener(this);
 		
 
 
 			addAndMakeVisible(tempoDisplayLabel);
 			TempoLabel.setFont(Font(Font::getDefaultMonospacedFontName(), 15.0f, Font::plain));
+			TempoLabel.setColour(juce::TextButton::textColourOffId, juce::Colours::black);
 
 
 
@@ -780,15 +876,15 @@ private:
 			auto scoreArea = r.removeFromTop(170);
 			midiKeyboard.setBounds(scoreArea.removeFromLeft(scoreArea.getWidth()));
 
-			auto marginA = r.removeFromTop(10);
+			auto marginA = r.removeFromTop(15);
 
 			//左右のボタン
-			auto sideWidth = 20;
+			auto sideWidth = 30;
 			Button_L.setBounds(r.removeFromLeft(sideWidth));
 			Button_R.setBounds(r.removeFromRight(sideWidth));
 
 
-			auto marginB = r.removeFromTop(5);
+
 
 			//コード部分
 			auto chordArea = r.removeFromTop(70);
@@ -809,11 +905,12 @@ private:
 
 
 			auto margin3 = r.removeFromTop(65);
+			auto margin9 = r.removeFromBottom(18);
 
 			//ジャンル部分
 			auto genreArea = r.removeFromLeft(r.getWidth() / 2);
 			auto marginC = genreArea.removeFromLeft(20);
-			auto marginD = genreArea.removeFromRight(50);
+			auto marginD = genreArea.removeFromRight(60);
 			auto genrerow1 = genreArea.removeFromTop(genreArea.getHeight() / 2);
 			auto genrerow2 = genreArea.removeFromTop(genreArea.getHeight() / 1);
 			Button_g1.setBounds(genrerow1.removeFromLeft(genrerow1.getWidth() / 4));
@@ -828,14 +925,23 @@ private:
 
 			//小節など
 			auto stateArea = r.removeFromLeft(r.getWidth() / 1);
-			auto marginE = genreArea.removeFromLeft(50);
-			auto marginF = genreArea.removeFromRight(20);
+			auto marginE = stateArea.removeFromLeft(100);
+			auto marginF = stateArea.removeFromRight(20);
 			auto staterow1 = stateArea.removeFromTop(stateArea.getHeight() / 2);
 			auto staterow2 = stateArea.removeFromTop(stateArea.getHeight());
 
-			Button_key.setBounds(staterow1.removeFromLeft(staterow1.getWidth() / 1));
+			keyLabel.setBounds(staterow1.removeFromLeft(staterow1.getWidth()/2));
+			Button_keyL.setBounds(staterow1.removeFromLeft(staterow1.getWidth()/2));
+			Button_keyR.setBounds(staterow1.removeFromLeft(staterow1.getWidth()/1));
 
-			Button_tone.setBounds(staterow2.removeFromLeft(staterow2.getWidth() / 1));
+			toneLabel.setBounds(staterow2.removeFromLeft(staterow2.getWidth() / 2));
+			Button_toneL.setBounds(staterow2.removeFromLeft(staterow2.getWidth() / 2));
+			Button_toneR.setBounds(staterow2.removeFromLeft(staterow2.getWidth() / 1));
+
+
+			//Button_key.setBounds(staterow1.removeFromLeft(staterow1.getWidth() / 1));
+
+			//Button_tone.setBounds(staterow2.removeFromLeft(staterow2.getWidth() / 1));
 			
 			
 			//timecodeDisplayLabel.setBounds(staterow1.removeFromLeft(staterow1.getWidth()));
@@ -948,20 +1054,47 @@ private:
 				updatePatternLabel();
 			}
 
+			if (clickedButton == &Button_keyL && Pitch != -12) {
+				Pitch--;
+				updatePitchLavel();
+			}
 
+			if (clickedButton == &Button_keyR && Pitch != 12) {
+				Pitch++;
+				updatePitchLavel();
+			}
+
+			if (clickedButton == &Button_toneL && Tone != 0) {
+				Tone--;
+				updateToneLavel();
+			}
+
+			if (clickedButton == &Button_toneR && Tone != 4) {
+				Tone++;
+				updateToneLavel();
+			}
 
 
 
 		}
 
-		void sliderValueChanged(juce::Slider* slider) override
-		{
-			if (slider == &Button_key) {
-			}
-				//durationSlider.setValue(1.0 / frequencySlider.getValue(), juce::dontSendNotification);
-				if (slider == &Button_tone) {
-				}
-				//frequencySlider.setValue(1.0 / durationSlider.getValue(), juce::dontSendNotification);
+
+		void updatePitchLavel() {
+			MemoryOutputStream Text;
+
+			Text << String::formatted("Key:%d", Pitch);
+			keyLabel.setText(Text.toString(), dontSendNotification);
+			updateChordLabel();
+
+		}
+
+		void updateToneLavel() {
+			MemoryOutputStream Text;
+			String inst[5] = { "Piano","Guitor","Synth","Strings","Bit" };
+			Text << inst[Tone]; //String::formatted("Key:%d", Pitch);
+			toneLabel.setText(Text.toString(), dontSendNotification);
+
+
 		}
 
 
@@ -1005,19 +1138,30 @@ private:
 
 
 
-			Pattern_Value[n] = (push + 1) % 4;
+			Pattern_Value[n] = (push + 1) % 5;
 
 			updatePatternLabel();
 
 
 		}
 
+
+		float mod(float a, float b){
+			return a - std::floor(a / b) * b;
+		}
+
 		//コードのボタン上のラベルを更新
 		void updateChordLabel() {
-			Button_c1.setButtonText(Chord_Name[Chord_Value[0 + Page][0]] + Chord_Type[Chord_Value[0 + Page][1]]);
-			Button_c2.setButtonText(Chord_Name[Chord_Value[1 + Page][0]] + Chord_Type[Chord_Value[1 + Page][1]]);
-			Button_c3.setButtonText(Chord_Name[Chord_Value[2 + Page][0]] + Chord_Type[Chord_Value[2 + Page][1]]);
-			Button_c4.setButtonText(Chord_Name[Chord_Value[3 + Page][0]] + Chord_Type[Chord_Value[3 + Page][1]]);
+
+			int v[4] = { Chord_Value[0 + Page][0],Chord_Value[1 + Page][0],Chord_Value[2 + Page][0],Chord_Value[3 + Page][0] };
+			for (int i = 0; i < 4; i++) {
+				v[i] = (v[i] + Pitch)>=0 ? (v[i] + Pitch) % 12 : ((v[i] + Pitch + 12) % 12) ;
+			}
+		
+			Button_c1.setButtonText(Chord_Name[v[0]] + Chord_Type[Chord_Value[0 + Page][1]]);
+			Button_c2.setButtonText(Chord_Name[v[1]] + Chord_Type[Chord_Value[1 + Page][1]]);
+			Button_c3.setButtonText(Chord_Name[v[2]] + Chord_Type[Chord_Value[2 + Page][1]]);
+			Button_c4.setButtonText(Chord_Name[v[3]] + Chord_Type[Chord_Value[3 + Page][1]]);
 
 
 		}
@@ -1063,17 +1207,16 @@ private:
 		TextButton Button_g8;
 		TextButton Button_L;
 		TextButton Button_R;
-		
-		//TextButton Button_key;
-		//TextButton Button_tone;
+		TextButton Button_keyL;
+		TextButton Button_keyR;
+		TextButton Button_toneL;
+		TextButton Button_toneR;
+		Label keyLabel;
+		Label toneLabel;
 
 
 		
-		Slider Button_key;
-		Slider Button_tone;
 
-		AudioParameterInt* _bkey;
-		AudioParameterInt* _btone;
 
 		
 
