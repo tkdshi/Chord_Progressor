@@ -331,6 +331,16 @@ public:
 			ChordKeyCheck(Chord_key, Chord_Value[beat_position[0]][1]);
 			int KEY = Chord_key[3] == -1 ? 2 : 3;
 			if ((beat_position[2] != beat_position[3])) {
+
+				if (beat_position[2] % 8 == 0 || beat_position[2] % 8 == 2 || beat_position[2] % 8 == 6) {
+					keyboardState.reset();
+					message[0] = juce::MidiMessage::noteOn(1, key_num + Chord_Value[beat_position[0]][0] + Chord_key[0] - 12/*noteNumber*/, (uint8)127);
+					midiMessages.addEvent(message[0], 0/*sample number*/);
+
+				}
+
+
+
 				if (beat_position[2] % 8 == 1 || beat_position[2] % 8 == 4 || beat_position[2] % 8 == 7) {
 					keyboardState.reset();
 					for (int i = 0; Chord_key[i] != -1; i++) {
@@ -339,15 +349,6 @@ public:
 
 					}
 					midiMessages.addEvent(message[0], 0/*sample number*/);
-
-				}
-
-
-				if (beat_position[2] % 8 == 0 || beat_position[2] % 8 == 2 || beat_position[2] % 8 == 6) {
-					keyboardState.reset();
-					message[0] = juce::MidiMessage::noteOn(1, key_num + Chord_Value[beat_position[0]][0] + Chord_key[0] - 12/*noteNumber*/, (uint8)127);
-					midiMessages.addEvent(message[0], 0/*sample number*/);
-
 
 				}
 
@@ -466,6 +467,7 @@ public:
 
 	}
 
+
 	void loadSampleFile() {
 		AudioFormatManager formatManager;
 		formatManager.registerBasicFormats();
@@ -581,18 +583,18 @@ private:
 		game
 		*/
 
-		int Chord_g1[16][8][2] = { {{0,0},{7,0},{9,0},{4,1},{0,0},{7,0},{9,0},{7,0}},
+		int Chord_g1[16][8][2] = { {{0,0},{7,0},{9,1},{4,1},{0,0},{7,0},{9,1},{7,0}},
 		{{5,0},{7,0},{9,1},{9,1},{5,0},{7,0},{9,1},{9,1} },
 		{ {0,0},{9,1},{5,0},{7,0},{0,0},{9,1},{5,0},{7,0} },
 		{ {9,1},{5,0},{0,0},{5,0},{9,1},{5,0},{0,0},{5,0} },
-		{ {5,4},{11,6},{4,2},{9,3},{5,4},{11,6},{4,2},{9,3} },
+		{ {2,3},{7,4},{0,2},{5,2},{11,2},{4,4},{7,1},{7,1} },
 		{ {5,0},{0,0},{5,0},{0,0},{5,0},{0,0},{5,0},{0,0} },
 		{ {5,0},{0,0},{9,1},{7,0},{5,0},{0,0},{9,1},{7,0} },
-		{ {9,0},{11,0},{5,0},{11,0},{9,0},{11,0},{5,0},{11,0}},
+		{ {9,1},{7,0},{5,0},{0,0},{9,1},{7,0},{5,0},{0,0}  },
 		{ {0,0},{9,1},{5,0},{7,0},{0,0},{9,1},{5,0},{7,0} },
 		{ {9,1},{2,1},{7,0},{9,1},{9,1},{2,1},{7,0},{9,1} },
-		{ {0,0},{7,0},{9,1},{7,0},{0,0},{7,0},{9,1},{7,0} },
-		{ {9,1},{7,0},{0,0},{5,0},{9,0},{7,0},{0,0},{5,0} },
+		{ {0,0},{7,0},{9,1},{7,0},{5,0},{0,0},{2,1},{7,0} },
+		{ {9,1},{7,0},{5,0},{0,0},{9,0},{7,0},{5,0},{0,0} },
 		{ {0,0},{5,0},{7,0},{0,0},{0,0},{5,0},{7,0},{0,0} },
 		{ {5,0},{7,0},{4,1},{9,1},{5,0},{7,0},{4,1},{9,1}},
 		{ {0,0},{5,0},{0,0},{7,0},{0,0},{5,0},{0,0},{7,0} },
@@ -602,8 +604,7 @@ private:
 	
 		
 		
-		int g_push[8] = { 0,0,0,0,0,0,0,0 }
-		;
+		int g_push[8] = { 0,0,0,0,0,0,0,0 };
 
 		const String Pattern_Name[5] = { "Normal","pop","wave","stylish","Jazz" };
 
@@ -923,9 +924,9 @@ private:
 			Button_g8.setBounds(genrerow2.removeFromLeft(genrerow2.getWidth() / 1));
 
 
-			//小節など
+			//設定
 			auto stateArea = r.removeFromLeft(r.getWidth() / 1);
-			auto marginE = stateArea.removeFromLeft(100);
+			auto marginE = stateArea.removeFromLeft(80);
 			auto marginF = stateArea.removeFromRight(20);
 			auto staterow1 = stateArea.removeFromTop(stateArea.getHeight() / 2);
 			auto staterow2 = stateArea.removeFromTop(stateArea.getHeight());
@@ -1062,6 +1063,7 @@ private:
 			if (clickedButton == &Button_keyR && Pitch != 12) {
 				Pitch++;
 				updatePitchLavel();
+				
 			}
 
 			if (clickedButton == &Button_toneL && Tone != 0) {
@@ -1082,7 +1084,7 @@ private:
 		void updatePitchLavel() {
 			MemoryOutputStream Text;
 
-			Text << String::formatted("Key:%d", Pitch);
+			Text <<  "Key:" << Chord_Name[(Pitch+12)%12] << String::formatted("(%d)", Pitch);
 			keyLabel.setText(Text.toString(), dontSendNotification);
 			updateChordLabel();
 
@@ -1091,7 +1093,7 @@ private:
 		void updateToneLavel() {
 			MemoryOutputStream Text;
 			String inst[5] = { "Piano","Guitor","Synth","Strings","Bit" };
-			Text << inst[Tone]; //String::formatted("Key:%d", Pitch);
+			Text << "Tone:" <<  inst[Tone]; //String::formatted("Key:%d", Pitch);
 			toneLabel.setText(Text.toString(), dontSendNotification);
 
 
