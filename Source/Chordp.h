@@ -51,11 +51,11 @@
 *******************************************************************************/
 
 #pragma once
-
-int Chord_Value[8][2] = { {5,0},{7,0},{9,1},{9,1},{5,0},{7,0},{9,1},{9,1} };
-int Pattern_Value[8] = { 0,0,0,0,0,0,0,0 };
-int Pitch = 0;
-int Tone = 0;
+//初期値の設定
+int Chord_Value[8][2] = { {5,0},{7,0},{9,1},{9,1},{5,0},{7,0},{9,1},{9,1} };　//コードの記号を指定する値(8小節)。0番目に音程を表す値(C,C#,D,..,B)、1番目にコードの種類を表す値（メジャー,マイナー,...）
+int Pattern_Value[8] = { 0,0,0,0,0,0,0,0 }; //奏法を指定する値
+int Pitch = 0; //キーを指定する値
+int Tone = 0; //音色を指定する値
 
 
 //==============================================================================
@@ -153,7 +153,7 @@ public:
 	int beat_position[4] = { 5,5,17,17 };
 	int Chord_key[5] = { 0,0,0,0,0 };
 
-
+	//コードの種類と使用音を紐付ける
 	void ChordKeyCheck(int key[5], int v) {
 		switch (v) {
 		case 0://major
@@ -203,6 +203,7 @@ public:
 		MidiMessage message[4];
 
 		//midiメッセージを追加
+		//奏法によって何拍目(beat_position)で音を鳴らすか決定
 
 			//ノートオン
 		if ((Pattern_Value[beat_position[0]] == 0) && (beat_position[0] != beat_position[1])) {
@@ -582,7 +583,7 @@ private:
 		anime
 		game
 		*/
-
+		//ジャンルごとに読み込まれるコードを設定
 		int Chord_g1[16][8][2] = { {{0,0},{7,0},{9,1},{4,1},{0,0},{7,0},{9,1},{7,0}},
 		{{5,0},{7,0},{9,1},{9,1},{5,0},{7,0},{9,1},{9,1} },
 		{ {0,0},{9,1},{5,0},{7,0},{0,0},{9,1},{5,0},{7,0} },
@@ -606,11 +607,11 @@ private:
 		
 		int g_push[8] = { 0,0,0,0,0,0,0,0 };
 
-		const String Pattern_Name[5] = { "Normal","pop","wave","stylish","Jazz" };
+		const String Pattern_Name[5] = { "Normal","pop","wave","stylish","Jazz" };//奏法名の指定
 
 		int Page = 0;
-		const String Chord_Name[12] = { "C","C#","D" ,"D#" ,"E" ,"F" ,"F#" ,"G" ,"G#" ,"A" ,"A#" ,"B" };
-		const String Chord_Type[7] = { "","m","M7","m7","7","m(-5)","m7(-5)" };
+		const String Chord_Name[12] = { "C","C#","D" ,"D#" ,"E" ,"F" ,"F#" ,"G" ,"G#" ,"A" ,"A#" ,"B" }; //コード名の指定
+		const String Chord_Type[7] = { "","m","M7","m7","7","m(-5)","m7(-5)" }; //コード名(種類)の指定
 
 		//カラーコードでボタンの色指定
 		const Colour backg_1 = juce::Colour::fromRGB((uint8)119, (uint8)149, (uint8)198);//こいあお
@@ -619,6 +620,8 @@ private:
 		const Colour backg_4 = juce::Colour::fromRGB((uint8)207, (uint8)227, (uint8)210);//うすいみどり
 		const Colour backg_5 = juce::Colour::fromRGB((uint8)204, (uint8)204, (uint8)204);//はいいろ
 
+
+		//GUIの作成
 		JuceDemoPluginAudioProcessorEditor(JuceDemoPluginAudioProcessor& owner)
 			: AudioProcessorEditor(owner),
 			midiKeyboard(owner.keyboardState, MidiKeyboardComponent::horizontalKeyboard),
@@ -1080,7 +1083,7 @@ private:
 
 		}
 
-
+		//キーの変更処理
 		void updatePitchLavel() {
 			MemoryOutputStream Text;
 
@@ -1089,7 +1092,7 @@ private:
 			updateChordLabel();
 
 		}
-
+		//音色の変更処理(未実装)
 		void updateToneLavel() {
 			MemoryOutputStream Text;
 			String inst[5] = { "Piano","Guitor","Synth","Strings","Bit" };
